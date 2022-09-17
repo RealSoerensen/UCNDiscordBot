@@ -1,0 +1,14 @@
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+app/bin/main/UCNDiscordBot/GetAPIKey.class
+<<<<<<< HEAD
+.vscode
+app/src/main/java/UCNDiscordBot/APIS/GetAPIKey.java
+app/bin/main/UCNDiscordBot/APIS/GetAPIKey.class
+=======
+app/src/main/java/UCNDiscordBot/APIS/GetAPIKey.java
+.vscode
+>>>>>>> 863327b2da2fd8cd74f607e46c9a40af81a730d8
