@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import UCNDiscordBot.APIS.GiphyAPI;
 import UCNDiscordBot.Functions.DiceRoller;
 import UCNDiscordBot.Functions.Facts;
+import UCNDiscordBot.Functions.Magic8Ball;
+import UCNDiscordBot.Functions.ProgrammerMeme;
 import UCNDiscordBot.Listeners.RoleListener.AvailableRoles;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
@@ -69,6 +71,16 @@ public class MessageListener extends ListenerAdapter {
             // Get a random fact about chucknorris
             if (isMessage(event, "!fact")) {
                 Facts.getFact(event);
+            }
+            // Get a random meme about programming
+            if (isMessage(event, "!meme")) {
+
+                ProgrammerMeme.getMeme(event);
+            }
+            // Get an answer from the magic 8-ball
+            if (isMessage(event, "!8ball")) {
+
+                Magic8Ball.ask8Ball(event);
             }
 
             // Check if the message is "!give" and arguments
@@ -230,6 +242,8 @@ public class MessageListener extends ListenerAdapter {
                 + "!coinflip - Simulate a coinflip\n"
                 + "!roll - Simulate a dice roll - ex: !roll 4d8 or !roll\n"
                 + "!fact - Prints a random Chuck Norris fact\n"
+                + "!meme - Prints a programming meme\n"
+                + "!8ball - Ask a magic 8-ball\n"
                 + "!gif <search> - Search for a gif. If blank a random gif will be found\n"
                 + "!roles - Gives a list of available roles you can get\n"
                 + "!give <role> - Assign you with a role from the list\n"
