@@ -2,61 +2,51 @@ package UCNDiscordBot.Functions;
 
 import java.util.Random;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-
 public class DiceRoller {
 
-    public static void rollXDXSend(MessageReceivedEvent event) {
-        String message = event.getMessage().getContentDisplay();
+    public static String rollXDXSend(String message) {
         String outputString = "";
         int diceAmount = 0;
         int diceSize = 0;
         int[] values;
-        double avg = 0;
+        String[] arg;
 
         try {
-            if (!message.equals("!roll")) {
-                String[] arg = message.split(" ");
-                arg = arg[1].split("d");
-                diceAmount = Integer.parseInt(arg[0]);
-                diceSize = Integer.parseInt(arg[1]);
-                values = rollXDX(diceAmount, diceSize);
-                if (diceAmount > 100000) {
-                    event.getChannel().sendMessage("Total amount of dice cant be larger than: 10000").queue();
-                    return;
-                }
-
-                for (int i = 0; i < values.length; i++) {
-                    if (i == 0) {
-                        outputString += values[i];
-                    } else {
-                        outputString += " + " + values[i];
-                    }
-                }
-
-                // Get sum of int array
-                int sum = 0;
-                for (int i = 0; i < values.length; i++) {
-                    sum += values[i];
-                }
-
-                outputString += " = " + sum;
-
-                if (outputString.length() >= 2000) {
-                    avg = (double) sum / ((double) values.length);
-                    event.getChannel().sendMessage("Total: " + sum + " - Avg: " + avg).queue();
-                } else {
-                    event.getChannel().sendMessage(outputString).queue();
-                }
-            } else {
+            if (message == null) {
                 // roll 6-sided dice
                 outputString += rollDX(6);
-                event.getChannel().sendMessage(outputString).queue();
+                return outputString;
             }
-        } catch (Exception e) {
-            event.getChannel().sendMessage("not a diceroll or too many characters").queue();
-        }
 
+            arg = message.split("d");
+            diceAmount = Integer.parseInt(arg[0]);
+            diceSize = Integer.parseInt(arg[1]);
+            values = rollXDX(diceAmount, diceSize);
+            if (diceAmount > 100000) {
+                return "Total amount of dice cant be larger than: 10000";
+            }
+
+            for (int i = 0; i < values.length; i++) {
+                if (i == 0) {
+                    outputString += values[i];
+                } else {
+                    outputString += " + " + values[i];
+                }
+            }
+
+            // Get sum of int array
+            int sum = 0;
+            for (int i = 0; i < values.length; i++) {
+                sum += values[i];
+            }
+
+            outputString += " = " + sum;
+            return outputString;
+
+        } catch (Exception e) {
+            System.out.println(e);
+            return "Invalid input";
+        }
     }
 
     public static int rollDX(int diceSize) {

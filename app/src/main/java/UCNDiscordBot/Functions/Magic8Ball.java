@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-
 public class Magic8Ball {
 
     List<String> answers = new ArrayList<String>();

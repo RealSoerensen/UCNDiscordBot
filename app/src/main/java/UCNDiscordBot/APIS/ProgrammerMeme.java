@@ -10,7 +10,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 public class ProgrammerMeme {
-
     public static String getMeme() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -28,7 +27,6 @@ public class ProgrammerMeme {
             JSONObject data = (JSONObject) json.get(0);
             String url = (String) data.get("image");
 
-            System.out.println(url);
             return url;
         } catch (Exception e) {
             System.out.println(e);

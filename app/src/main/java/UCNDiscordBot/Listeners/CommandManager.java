@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import UCNDiscordBot.APIS.Facts;
 import UCNDiscordBot.APIS.GiphyAPI;
 import UCNDiscordBot.APIS.ProgrammerMeme;
+import UCNDiscordBot.Functions.DiceRoller;
 import UCNDiscordBot.Functions.Magic8Ball;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
@@ -32,7 +33,6 @@ public class CommandManager extends ListenerAdapter {
             // Run the '/welcome' command.
             String userTag = event.getUser().getAsTag();
             event.reply("Welcome to the server, **" + userTag + "**!").setEphemeral(true).queue();
-
         }
 
         else if (command.equals("roles")) {
@@ -46,7 +46,6 @@ public class CommandManager extends ListenerAdapter {
                 message += key + ": " + roles.get(key) + "\n";
             }
             event.reply(message).setEphemeral(true).queue();
-
         }
 
         else if (command.equals("playercount")) {
@@ -57,36 +56,13 @@ public class CommandManager extends ListenerAdapter {
 
         else if (command.equals("roll")) {
             // run the '/roll' command.
-            String userTag = event.getUser().getAsMention();
-            int roll = (int) (Math.random() * 99) + 1;
-            event.reply(userTag + " rolled a **" + roll + "**!").queue();
-        }
-
-        else if (command.equals("help")) {
-            // run the '/commands' command.
-            String userTag = event.getUser().getAsMention();
-            event.reply("__**Here are the commands**__ " + userTag + ":"
-                    + "\n '__**/welcome**__' - welcomes you to the server. "
-                    + "\n '__**/roles**__' - lists all the roles on the server. "
-                    + "\n '__**/playercount**__' - tells you how many users are on the server. "
-                    + "\n '__**/roll**__' - rolls a random number between 1 and 100. "
-                    + "\n '__**/coinflip**__' - flips a coin. "
-                    + "\n '__**/removerole**__' - <role> removes a specifc role. "
-                    + "\n '__**/addrole**__' - <role> adds a specific role to a user. "
-                    + "\n '__**/help**__' - Shows this information. "
-                    + "\n '__**/gif**__' <search> - Search for a gif. If blank a random gif will be found. "
-                    + "\n '__**/ping**__' - Response with Pong! "
-                    + "\n '__**/fact**__' - Prints a random Chuck Norris fact "
-                    + "\n "
-                    + "\n __**Music Player commands:**__ "
-                    + "\n '__**!play**__' - <url> - Plays a song from a url. "
-                    + "\n '__**!skip**__' - Skips the current song. "
-                    + "\n '__**!disconnect**__' - Disconnects the bot from the voice channel. "
-                    + "\n '__**!pause**__' - Pauses the current song. "
-                    + "\n '__**!resume**__' - Resumes the current song. "
-                    + "\n '__**!queue**__' - Shows the current queue. "
-                    + "\n '__**!clear**__' - Clears the current queue. ").setEphemeral(true).queue();
-
+            String message = "";
+            if (event.getOption("xdx") == null) {
+                message = null;
+            } else {
+                message = event.getOption("xdx").getAsString();
+            }
+            event.reply(DiceRoller.rollXDXSend(message)).setEphemeral(true).queue();
         }
 
         else if (command.equals("removerole")) {
@@ -124,7 +100,7 @@ public class CommandManager extends ListenerAdapter {
             // Get random number
             int index = random.nextInt(side.length);
             // Send message
-            event.reply("You've rolled : **" + side[index] + "**").setEphemeral(true).queue();
+            event.reply("You've flipped : **" + side[index] + "**").setEphemeral(true).queue();
         }
 
         else if (command.equals("ping")) {
@@ -140,49 +116,56 @@ public class CommandManager extends ListenerAdapter {
         else if (command.equals("gif")) {
             // run the '/gif' command.
             String url = gifOutput(event);
-            event.reply(url).setEphemeral(true).queue();
+            event.reply(url).queue();
         }
 
         else if (command.equals("meme")) {
-
             String url = ProgrammerMeme.getMeme();
-            event.reply(url).setEphemeral(true).queue();
+            event.reply(url).queue();
         }
+
         // Get an answer from the magic 8-ball
         else if (command.equals("8ball")) {
-
-            String text = Magic8Ball.ask8Ball();
-            event.reply(text).setEphemeral(true).queue();
+            String answer = Magic8Ball.ask8Ball();
+            String posterName = event.getUser().getAsMention();
+            String message = event.getOption("question").getAsString();
+            event.reply(posterName + " asked '" + message + "?'...\n" + answer).queue();
         }
 
-    }
+        else if (command.equals("help")) {
+            // run the '/commands' command.
+            String userTag = event.getUser().getAsMention();
+            event.reply("__**Here are the commands**__ " + userTag + ":"
+                    + "\n '__**/welcome**__' - welcomes you to the server. "
+                    + "\n '__**/roles**__' - lists all the roles on the server. "
+                    + "\n '__**/playercount**__' - tells you how many users are on the server. "
+                    + "\n '__**/roll**__' - rolls a dice from 1-6 or in the format of 'xdx'. "
+                    + "\n '__**/coinflip**__' - flips a coin. "
+                    + "\n '__**/removerole**__' - <role> removes a specifc role. "
+                    + "\n '__**/addrole**__' - <role> adds a specific role to a user. "
+                    + "\n '__**/help**__' - Shows this information. "
+                    + "\n '__**/gif**__' <search> - Search for a gif. If blank a random gif will be found. "
+                    + "\n '__**/ping**__' - Response with Pong! "
+                    + "\n '__**/fact**__' - Prints a random Chuck Norris fact "
+                    + "\n '__**/meme**__' - Prints a random programmer meme "
+                    + "\n '__**/8ball**__' - Ask the magic 8-ball a question. "
+                    + "\n "
+                    + "\n __**Music Player commands:**__ "
+                    + "\n '__**!play**__' - <url> - Plays a song from a url. "
+                    + "\n '__**!skip**__' - Skips the current song. "
+                    + "\n '__**!disconnect**__' - Disconnects the bot from the voice channel. "
+                    + "\n '__**!pause**__' - Pauses the current song. "
+                    + "\n '__**!resume**__' - Resumes the current song. "
+                    + "\n '__**!queue**__' - Shows the current queue. "
+                    + "\n '__**!clear**__' - Clears the current queue. ").setEphemeral(true).queue();
 
-    private String gifOutput(SlashCommandInteractionEvent event) {
-        // Init variables
-        String gif = "";
-
-        // If the message contains no arguments
-        if (event.getOption("search") == null) {
-            // Get a random gif
-            try {
-                gif = (String) GiphyAPI.getRandomGif();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        // If the message contains arguments
-        else {
-            String args = event.getOption("search").getAsString();
-            // Try and get gif from GiphyAPI
-            try {
-                gif = (String) GiphyAPI.getGif(args);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return gif;
     }
     // Guild command -- Instantly updated (max 100)
+
+    private String gifOutput(@NotNull SlashCommandInteractionEvent event) {
+        return null;
+    }
 
     @Override
     public void onGuildReady(@NotNull GuildReadyEvent event) {
@@ -190,18 +173,22 @@ public class CommandManager extends ListenerAdapter {
         commandData.add(Commands.slash("welcome", "Get welcomed by the bot."));
         commandData.add(Commands.slash("roles", "Check the roles on the server."));
         commandData.add(Commands.slash("playercount", "Check the playercount on the server."));
-        commandData.add(Commands.slash("roll", "Roll a random number between 1 and 100."));
         commandData.add(Commands.slash("help", "List all the commands."));
         commandData.add(Commands.slash("coinflip", "description"));
         commandData.add(Commands.slash("ping", "Return a pong."));
+        commandData.add(Commands.slash("fact", "Get a random Chuck Norris fact."));
+        commandData.add(Commands.slash("meme", "Get a random programmer meme."));
         commandData.add(Commands.slash("gif", "Search for a gif. If blank a random gif will be found.")
                 .addOption(OptionType.STRING, "search", "Search for a gif.", false));
         commandData.add(Commands.slash("removerole", "Remove a role from yourself.")
                 .addOption(OptionType.STRING, "role", "The role you want to remove.", true));
         commandData.add(Commands.slash("addrole", "Add a role from yourself.")
                 .addOption(OptionType.STRING, "role", "The role you want to add.", true));
+        commandData.add(Commands.slash("8ball", "Get an answer from the magic 8-ball.")
+                .addOption(OptionType.STRING, "question", "The question you want to ask.", true));
+        commandData.add(Commands.slash("roll", "Roll random numbers")
+                .addOption(OptionType.STRING, "xdx", "The dice you want to roll.", false));
         event.getGuild().updateCommands().addCommands(commandData).queue();
-
     }
 
     @Override
