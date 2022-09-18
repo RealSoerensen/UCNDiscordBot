@@ -7,7 +7,8 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 // Class to give rank on react
-public class ReactRole extends ListenerAdapter {
+public class listenReact extends ListenerAdapter {
+    @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
         if (event.getUser().isBot())
             return;
@@ -42,6 +43,7 @@ public class ReactRole extends ListenerAdapter {
         try {
             Thread.sleep(50);
         } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         event.getGuildChannel().addReactionById(event.getMessageId(), Emoji.fromUnicode("U+2705")).queue();
