@@ -1,7 +1,6 @@
 package UCNDiscordBot.Listeners.RoleListener;
 
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class ChangeRole {
     public static void giveRole(SlashCommandInteractionEvent event, String role) {

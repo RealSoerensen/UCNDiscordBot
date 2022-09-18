@@ -1,4 +1,4 @@
-package UCNDiscordBot.Listeners;
+package UCNDiscordBot.Listeners.MessageListener;
 
 import org.jetbrains.annotations.NotNull;
 

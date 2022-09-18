@@ -1,4 +1,4 @@
-package UCNDiscordBot.APIS;
+package UCNDiscordBot.APIS.APICalls;
 
 import java.io.IOException;
 import java.net.URI;
@@ -11,6 +11,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
+import UCNDiscordBot.APIS.GetAPIKey;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class GiphyAPI {

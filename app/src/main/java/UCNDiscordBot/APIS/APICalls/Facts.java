@@ -1,37 +1,37 @@
-package UCNDiscordBot.APIS;
+package UCNDiscordBot.APIS.APICalls;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-public class ProgrammerMeme {
-    public static String getMeme() {
+import UCNDiscordBot.APIS.GetAPIKey;
+
+public class Facts {
+
+    public static String getFact() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://programming-memes-images.p.rapidapi.com/v1/memes"))
+                    .uri(URI.create("https://matchilling-chuck-norris-jokes-v1.p.rapidapi.com/jokes/random"))
+                    .header("accept", "application/json")
                     .header("X-RapidAPI-Key", GetAPIKey.getRapidAPIKey())
-                    .header("X-RapidAPI-Host", "programming-memes-images.p.rapidapi.com")
+                    .header("X-RapidAPI-Host", "matchilling-chuck-norris-jokes-v1.p.rapidapi.com")
                     .method("GET", HttpRequest.BodyPublishers.noBody())
                     .build();
             HttpResponse<String> response = HttpClient.newHttpClient().send(request,
                     HttpResponse.BodyHandlers.ofString());
-            // System.out.println(response.body());
 
             JSONParser parser = new JSONParser();
-            JSONArray json = (JSONArray) parser.parse(response.body());
-            JSONObject data = (JSONObject) json.get(0);
-            String url = (String) data.get("image");
+            JSONObject json = (JSONObject) parser.parse(response.body());
+            String data = (String) json.get("value");
 
-            return url;
+            return data;
         } catch (Exception e) {
             System.out.println(e);
         }
         return null;
     }
-
 }

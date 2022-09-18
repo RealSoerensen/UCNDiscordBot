@@ -7,8 +7,8 @@ import java.util.Random;
 
 import org.jetbrains.annotations.NotNull;
 
-import UCNDiscordBot.APIS.Facts;
-import UCNDiscordBot.APIS.ProgrammerMeme;
+import UCNDiscordBot.APIS.APICalls.Facts;
+import UCNDiscordBot.APIS.APICalls.ProgrammerMeme;
 import UCNDiscordBot.Functions.DiceRoller;
 import UCNDiscordBot.Functions.Magic8Ball;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
