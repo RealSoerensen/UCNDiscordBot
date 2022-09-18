@@ -1,12 +1,10 @@
 package UCNDiscordBot.Listeners.ReactionListener;
 
-import java.lang.reflect.Member;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
