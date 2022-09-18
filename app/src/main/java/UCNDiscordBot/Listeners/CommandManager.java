@@ -8,13 +8,11 @@ import java.util.Random;
 import org.jetbrains.annotations.NotNull;
 
 import UCNDiscordBot.APIS.Facts;
-import UCNDiscordBot.APIS.GiphyAPI;
 import UCNDiscordBot.APIS.ProgrammerMeme;
 import UCNDiscordBot.Functions.DiceRoller;
 import UCNDiscordBot.Functions.Magic8Ball;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
-import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
