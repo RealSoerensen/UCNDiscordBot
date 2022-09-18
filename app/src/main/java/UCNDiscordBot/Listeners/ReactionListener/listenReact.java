@@ -20,6 +20,7 @@ public class listenReact extends ListenerAdapter {
                 for (int i = 1; i < event.getGuild().getRoles().size(); i++) {
                     // Get role id
                     String roleID = event.getGuild().getRoles().get(i).getId();
+                    
 
                     // Get the role name
                     String roleName = event.getGuild().getRoles().get(i).getName();
