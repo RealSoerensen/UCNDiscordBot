@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class PlayerCount {
-    public static HashMap getRoleCount(MessageReceivedEvent event) {
+    public static HashMap getRoleCount(SlashCommandInteractionEvent event) {
         // return a hashmap of roles bot can interact with excluding @everyone
         HashMap<String, Integer> roleCount = new HashMap<String, Integer>();
         // get all roles
