@@ -119,6 +119,7 @@ public class MessageListener extends ListenerAdapter {
         newRole.setName(event.getMessage().getContentDisplay());
         newRole.setPermissions(0L);
         newRole.setColor(getColor());
+        newRole.setHoisted(true);
         newRole.complete();
     }
 
