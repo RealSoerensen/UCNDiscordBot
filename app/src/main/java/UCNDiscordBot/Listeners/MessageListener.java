@@ -175,13 +175,6 @@ public class MessageListener extends ListenerAdapter {
         }
     }
 
-    private void diceRoll(MessageReceivedEvent event) {
-        // NEED description
-        Random random = new Random();
-        int index = random.nextInt(6) + 1;
-        event.getChannel().sendMessage(Integer.toString(index)).queue();
-    }
-
     private void giveRole(MessageReceivedEvent event, String args) {
         // Check if args is not empty
         if (args.length() > 0) {

@@ -2,8 +2,6 @@ package UCNDiscordBot.Functions;
 
 import java.util.Random;
 
-import com.google.common.base.Throwables;
-
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class DiceRoller {
