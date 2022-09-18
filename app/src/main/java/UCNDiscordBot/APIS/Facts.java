@@ -1,4 +1,4 @@
-package UCNDiscordBot.Functions;
+package UCNDiscordBot.APIS;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -8,14 +8,10 @@ import java.net.http.HttpResponse;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import UCNDiscordBot.APIS.GetAPIKey;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-
 public class Facts {
 
-    public static void getFact(MessageReceivedEvent event) {
+    public static String getFact() {
         try {
-            System.out.println("Trying to give you a fact");
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://matchilling-chuck-norris-jokes-v1.p.rapidapi.com/jokes/random"))
                     .header("accept", "application/json")
@@ -30,14 +26,10 @@ public class Facts {
             JSONObject json = (JSONObject) parser.parse(response.body());
             String data = (String) json.get("value");
 
-            // System.out.println(response.body());
-            // String[] dummy = response.body().split(":");
-            // dummy = dummy[dummy.length - 1].split("\"");
-            // System.out.println(data);
-            event.getChannel().sendMessage(data).queue();
+            return data;
         } catch (Exception e) {
             System.out.println(e);
         }
-
+        return null;
     }
 }

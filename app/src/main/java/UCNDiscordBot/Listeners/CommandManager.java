@@ -7,7 +7,10 @@ import java.util.Random;
 
 import org.jetbrains.annotations.NotNull;
 
+import UCNDiscordBot.APIS.Facts;
 import UCNDiscordBot.APIS.GiphyAPI;
+import UCNDiscordBot.APIS.ProgrammerMeme;
+import UCNDiscordBot.Functions.Magic8Ball;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
 import net.dv8tion.jda.api.entities.GuildChannel;
@@ -30,7 +33,9 @@ public class CommandManager extends ListenerAdapter {
             String userTag = event.getUser().getAsTag();
             event.reply("Welcome to the server, **" + userTag + "**!").setEphemeral(true).queue();
 
-        } else if (command.equals("roles")) {
+        }
+
+        else if (command.equals("roles")) {
             // Init hasmap for roles
             HashMap<String, Integer> roles = new HashMap<String, Integer>();
             // Get all roles from method
@@ -42,18 +47,22 @@ public class CommandManager extends ListenerAdapter {
             }
             event.reply(message).setEphemeral(true).queue();
 
-        } else if (command.equals("playercount"))
+        }
 
-        {
+        else if (command.equals("playercount")) {
             // Run the '/playercount' command.
             String playerCount = event.getGuild().getMemberCount() + "";
             event.reply("__There is **" + playerCount + "** users on the server!__").setEphemeral(true).queue();
-        } else if (command.equals("roll")) {
+        }
+
+        else if (command.equals("roll")) {
             // run the '/roll' command.
             String userTag = event.getUser().getAsMention();
             int roll = (int) (Math.random() * 99) + 1;
             event.reply(userTag + " rolled a **" + roll + "**!").queue();
-        } else if (command.equals("help")) {
+        }
+
+        else if (command.equals("help")) {
             // run the '/commands' command.
             String userTag = event.getUser().getAsMention();
             event.reply("__**Here are the commands**__ " + userTag + ":"
@@ -78,7 +87,9 @@ public class CommandManager extends ListenerAdapter {
                     + "\n '__**!queue**__' - Shows the current queue. "
                     + "\n '__**!clear**__' - Clears the current queue. ").setEphemeral(true).queue();
 
-        } else if (command.equals("removerole")) {
+        }
+
+        else if (command.equals("removerole")) {
             // run the '/removeRole' command to remove a role.
             String role = event.getOption("role").getAsString();
             if (role.length() > 0) {
@@ -89,7 +100,9 @@ public class CommandManager extends ListenerAdapter {
                 // Send message to user
                 event.reply("Please specify a role").setEphemeral(true).queue();
             }
-        } else if (command.equals("addrole")) {
+        }
+
+        else if (command.equals("addrole")) {
             // run the '/addRole' command to add a role.
             String role = event.getOption("role").getAsString();
             if (role.length() > 0) {
@@ -101,7 +114,9 @@ public class CommandManager extends ListenerAdapter {
                 // Send message to user
                 event.reply("__Please specify a role__").setEphemeral(true).queue();
             }
-        } else if (command.equals("coinflip")) {
+        }
+
+        else if (command.equals("coinflip")) {
             // Init string array
             final String[] side = { "Heads", "Tails" };
             // Init random
@@ -110,17 +125,39 @@ public class CommandManager extends ListenerAdapter {
             int index = random.nextInt(side.length);
             // Send message
             event.reply("You've rolled : **" + side[index] + "**").setEphemeral(true).queue();
-        } else if (command.equals("ping")) {
+        }
+
+        else if (command.equals("ping")) {
             // run the '/ping' command.
             event.reply("Pong!").setEphemeral(true).queue();
-        } else if (command.equals("gif")) {
-            gifOutput(event);
+        }
 
+        else if (command.equals("fact")) {
+            // run the '/fact' command.
+            event.reply(Facts.getFact()).setEphemeral(true).queue();
+        }
+
+        else if (command.equals("gif")) {
+            // run the '/gif' command.
+            String url = gifOutput(event);
+            event.reply(url).setEphemeral(true).queue();
+        }
+
+        else if (command.equals("meme")) {
+
+            String url = ProgrammerMeme.getMeme();
+            event.reply(url).setEphemeral(true).queue();
+        }
+        // Get an answer from the magic 8-ball
+        else if (command.equals("8ball")) {
+
+            String text = Magic8Ball.ask8Ball();
+            event.reply(text).setEphemeral(true).queue();
         }
 
     }
 
-    private void gifOutput(SlashCommandInteractionEvent event) {
+    private String gifOutput(SlashCommandInteractionEvent event) {
         // Init variables
         String gif = "";
 
@@ -132,7 +169,6 @@ public class CommandManager extends ListenerAdapter {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            event.reply(gif).queue();
         }
         // If the message contains arguments
         else {
@@ -143,8 +179,8 @@ public class CommandManager extends ListenerAdapter {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            event.reply(gif).queue();
         }
+        return gif;
     }
     // Guild command -- Instantly updated (max 100)
 
