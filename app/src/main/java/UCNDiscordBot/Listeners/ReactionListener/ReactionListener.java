@@ -1,7 +1,12 @@
 package UCNDiscordBot.Listeners.ReactionListener;
 
+import java.lang.reflect.Member;
+import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -25,6 +30,7 @@ public class ReactionListener extends ListenerAdapter {
     }
 
     private void assignRole(MessageReactionAddEvent event) {
+        List<Role> memberRoles = event.getGuild().getMemberById(event.getUserId()).getRoles();
         // Check if the reaction is the checkmark
         if (event.getReaction().getEmoji().asUnicode().equals(Emoji.fromUnicode("U+2705"))) {
             // Get message id
@@ -40,9 +46,20 @@ public class ReactionListener extends ListenerAdapter {
                 // Get the role name
                 String roleName = event.getGuild().getRoles().get(i).getName();
 
+                // Get role
+                Role thisRole;
+                thisRole = event.getGuild().getRoleById(roleID);
+
                 // If the message content equals the role name then add the role to the user
                 if (message.equals(roleName)) {
-                    setRole(roleID, event);
+                    if (memberRoles.contains(thisRole)) {
+                        System.out.println("removing role");
+                        removeRole(roleID, event);
+                    } else {
+                        System.out.println("setting role");
+                        setRole(roleID, event);
+                    }
+
                 }
             }
         }
@@ -58,6 +75,10 @@ public class ReactionListener extends ListenerAdapter {
 
     private void setRole(String roleId, MessageReactionAddEvent event) {
         event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRoleById(roleId)).queue();
+    }
+
+    private void removeRole(String roleId, MessageReactionAddEvent event) {
+        event.getGuild().removeRoleFromMember(event.getMember(), event.getGuild().getRoleById(roleId)).queue();
     }
 
     private void resetReactions(MessageReactionAddEvent event) {
