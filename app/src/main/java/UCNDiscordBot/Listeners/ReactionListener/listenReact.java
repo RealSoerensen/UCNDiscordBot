@@ -10,29 +10,47 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 public class listenReact extends ListenerAdapter {
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
+        //This runs if anyone reacts to a message
+        
+        //The eventhandler
         if (event.getUser().isBot())
+            //checks if the owner of the message is a bot
             return;
-        if (event.getChannel().getName().equals("roles")) {
-            if (event.getReaction().getEmoji().asUnicode().equals(Emoji.fromUnicode("U+2705"))) {
-                String messageID = event.getMessageId();
-                String message = event.getChannel().retrieveMessageById(messageID).complete()
-                        .getContentDisplay();
-                for (int i = 1; i < event.getGuild().getRoles().size(); i++) {
-                    // Get role id
-                    String roleID = event.getGuild().getRoles().get(i).getId();
-                    
+        if (isChannel(event, "roles")) {
+            //This is true if the reaction happened in the channel called role
 
-                    // Get the role name
-                    String roleName = event.getGuild().getRoles().get(i).getName();
+            //PATRICK! could you please describe this
+            assignRole(event);
+        }
+    }
 
-                    // If the message content equals the role name then add the role to the user
-                    if (message.equals(roleName)) {
-                        setRole(roleID, event);
-                    }
+    private void assignRole(MessageReactionAddEvent event){
+        //PATRICK! could you please describe this
+        if (event.getReaction().getEmoji().asUnicode().equals(Emoji.fromUnicode("U+2705"))) {
+            String messageID = event.getMessageId();
+            String message = event.getChannel().retrieveMessageById(messageID).complete()
+                    .getContentDisplay();
+            for (int i = 1; i < event.getGuild().getRoles().size(); i++) {
+                // Get role id
+                String roleID = event.getGuild().getRoles().get(i).getId();
+                
+
+                // Get the role name
+                String roleName = event.getGuild().getRoles().get(i).getName();
+
+                // If the message content equals the role name then add the role to the user
+                if (message.equals(roleName)) {
+                    setRole(roleID, event);
                 }
             }
-            resetReactions(event);
         }
+        resetReactions(event);
+    }
+
+    private boolean isChannel(MessageReactionAddEvent event, String channel){
+        //Checks if the message was written in a specific channel
+        //this will be used is the eventhandler
+        return event.getChannel().getName().equals(channel);
     }
 
     private void setRole(String roleId, MessageReactionAddEvent event) {
