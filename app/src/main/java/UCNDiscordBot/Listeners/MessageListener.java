@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import UCNDiscordBot.APIS.GiphyAPI;
 import UCNDiscordBot.Functions.DiceRoller;
+import UCNDiscordBot.Functions.Facts;
 import UCNDiscordBot.Listeners.RoleListener.AvailableRoles;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
@@ -60,9 +61,14 @@ public class MessageListener extends ListenerAdapter {
             if (isMessageStartWith(event, "!gif")) {
                 gifOutput(event);
             }
-
+            // roll some dice
             if (isMessageStartWith(event, "!roll")) {
                 DiceRoller.rollXDXSend(event);
+            }
+
+            // Get a random fact about chucknorris
+            if (isMessage(event, "!fact")) {
+                Facts.getFact(event);
             }
 
             // Check if the message is "!give" and arguments
@@ -223,6 +229,7 @@ public class MessageListener extends ListenerAdapter {
                 + "!ping - Response with Pong!\n"
                 + "!coinflip - Simulate a coinflip\n"
                 + "!roll - Simulate a dice roll - ex: !roll 4d8 or !roll\n"
+                + "!fact - Prints a random Chuck Norris fact\n"
                 + "!gif <search> - Search for a gif. If blank a random gif will be found\n"
                 + "!roles - Gives a list of available roles you can get\n"
                 + "!give <role> - Assign you with a role from the list\n"
