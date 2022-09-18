@@ -3,6 +3,7 @@ package UCNDiscordBot.Listeners;
 import org.jetbrains.annotations.NotNull;
 
 import UCNDiscordBot.APIS.GiphyAPI;
+import UCNDiscordBot.Functions.DiceRoller;
 import UCNDiscordBot.Listeners.RoleListener.AvailableRoles;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
@@ -60,29 +61,33 @@ public class MessageListener extends ListenerAdapter {
                 gifOutput(event);
             }
 
-            // Simulate dice roll
-            if (isMessage(event, "!roll")) {
-                diceRoll(event);
+            if (isMessageStartWith(event, "!roll")) {
+                DiceRoller.rollXDXSend(event);
             }
+
             // Check if the message is "!give" and arguments
             if (isMessageStartWith(event, "!give")) {
                 // Check if the message is "!give" and arguments
                 String args = event.getMessage().getContentRaw().substring(6);
                 giveRole(event, args);
             }
+
             // Check if the message is "!remove" and arguments
             if (isMessageStartWith(event, "!remove")) {
                 String args = event.getMessage().getContentDisplay().substring(8);
                 removeRole(event, args);
             }
+
             // Check if the message is "!roles"
             if (isMessage(event, "!roles")) {
                 getRoles(event);
             }
+
             // Check if message is "!playercount"
             if (isMessage(event, "!playercount")) {
                 getPlayerCount(event);
             }
+
             // Check if the message is "!help"
             if (isMessage(event, "!help")) {
                 getHelp(event);
@@ -170,13 +175,6 @@ public class MessageListener extends ListenerAdapter {
         }
     }
 
-    private void diceRoll(MessageReceivedEvent event) {
-        // NEED description
-        Random random = new Random();
-        int index = random.nextInt(6) + 1;
-        event.getChannel().sendMessage(Integer.toString(index)).queue();
-    }
-
     private void giveRole(MessageReceivedEvent event, String args) {
         // Check if args is not empty
         if (args.length() > 0) {
@@ -223,7 +221,7 @@ public class MessageListener extends ListenerAdapter {
         event.getChannel().sendMessage("Available commands:\n"
                 + "!ping - Response with Pong!\n"
                 + "!coinflip - Simulate a coinflip\n"
-                + "!roll - Simulate a dice roll\n"
+                + "!roll - Simulate a dice roll - ex: !roll 4d8 or !roll\n"
                 + "!gif <search> - Search for a gif. If blank a random gif will be found\n"
                 + "!roles - Gives a list of available roles you can get\n"
                 + "!give <role> - Assign you with a role from the list\n"
