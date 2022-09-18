@@ -3,6 +3,7 @@ package UCNDiscordBot;
 import javax.security.auth.login.LoginException;
 
 import UCNDiscordBot.APIS.GetAPIKey;
+import UCNDiscordBot.Listeners.CommandManager;
 import UCNDiscordBot.Listeners.MessageListener;
 import UCNDiscordBot.MusicPlayer.*;
 import UCNDiscordBot.Listeners.ReactionListener.ReactionListener;
@@ -26,6 +27,7 @@ public class App extends ListenerAdapter {
         builder.addEventListeners(new MessageListener());
         builder.addEventListeners(new MusicPlayer());
         builder.addEventListeners(new ReactionListener());
+        builder.addEventListeners(new CommandManager());
 
         // Set enabled intents
         builder.setEnabledIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS,

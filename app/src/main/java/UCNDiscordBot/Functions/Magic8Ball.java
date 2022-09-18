@@ -33,13 +33,12 @@ public class Magic8Ball {
         answers.add("Very doubtful.");
     }
 
-    public static void ask8Ball(MessageReceivedEvent event) {
+    public static String ask8Ball() {
 
         Magic8Ball test = new Magic8Ball();
         Random random = new Random();
         int index = random.nextInt(0, test.answers.size());
 
-        event.getChannel().sendMessage(test.answers.get(index)).queue();
-
+        return test.answers.get(index);
     }
 }

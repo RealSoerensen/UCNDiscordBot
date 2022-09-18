@@ -1,4 +1,4 @@
-package UCNDiscordBot.Functions;
+package UCNDiscordBot.APIS;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -9,12 +9,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import UCNDiscordBot.APIS.GetAPIKey;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-
 public class ProgrammerMeme {
 
-    public static void getMeme(MessageReceivedEvent event) {
+    public static String getMeme() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://programming-memes-images.p.rapidapi.com/v1/memes"))
@@ -31,15 +28,12 @@ public class ProgrammerMeme {
             JSONObject data = (JSONObject) json.get(0);
             String url = (String) data.get("image");
 
-            // System.out.println(response.body());
-            // String[] dummy = response.body().split(":");
-            // dummy = dummy[dummy.length - 1].split("\"");
             System.out.println(url);
-            event.getChannel().sendMessage(url).queue();
+            return url;
         } catch (Exception e) {
             System.out.println(e);
         }
-
+        return null;
     }
 
 }
