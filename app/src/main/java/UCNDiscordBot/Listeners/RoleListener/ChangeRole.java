@@ -1,39 +1,48 @@
 package UCNDiscordBot.Listeners.RoleListener;
 
+import java.util.List;
+
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class ChangeRole {
-    public static void giveRole(SlashCommandInteractionEvent event, String role) {
+    public static String addRole(SlashCommandInteractionEvent event, String role) {
+        // Check if entered role exist
+        List<Role> allGuildRoles = event.getGuild().getRolesByName(role, true);
+        if (allGuildRoles.size() == 0) {
+            return "The role** " + role + "** doesn't exist";
+        }
+        Role guildRole = allGuildRoles.get(0);
         // Check if bot can give the role and if the user has the role
-        String rolen = event.getOption("role").getAsString();
-        if (event.getGuild().getSelfMember().canInteract(event.getGuild().getRolesByName(role, true).get(0))) {
-            if (!event.getMember().getRoles().contains(event.getGuild().getRolesByName(role, true).get(0))) {
-                event.getGuild().addRoleToMember(event.getMember(), event.getGuild().getRolesByName(role, true).get(0))
-                        .queue();
-                event.reply("You have been given the role** " + rolen + "**").setEphemeral(true).queue();
+        if (event.getGuild().getSelfMember().canInteract(guildRole)) {
+            if (!event.getMember().getRoles().contains(guildRole)) {
+                event.getGuild().addRoleToMember(event.getMember(), guildRole).queue();
+                return "You have been given the role** " + role + "**";
             } else {
-                event.reply("You already have the role** " + rolen + "**").setEphemeral(true).queue();
+                return "You already have the role** " + role + "**";
             }
         } else {
-            event.reply("I can't give you the role** " + rolen + "**").setEphemeral(true).queue();
+            return "I can't give you the role** " + role + "**";
         }
     }
 
-    public static void removeRole(SlashCommandInteractionEvent event, String role) {
+    public static String removeRole(SlashCommandInteractionEvent event, String role) {
+        // Check if entered role exist
+        List<Role> allGuildRoles = event.getGuild().getRolesByName(role, true);
+        if (allGuildRoles.size() == 0) {
+            return "The role** " + role + "** doesn't exist";
+        }
+        Role guildRole = allGuildRoles.get(0);
         // Check if bot can remove the role and if the user has the role
-        String rolen = event.getOption("role").getAsString();
-        if (event.getGuild().getSelfMember().canInteract(event.getGuild().getRolesByName(role, true).get(0))) {
-            if (event.getMember().getRoles().contains(event.getGuild().getRolesByName(role, true).get(0))) {
-                event.getGuild()
-                        .removeRoleFromMember(event.getMember(), event.getGuild().getRolesByName(role, true).get(0))
-                        .queue();
-                event.reply("You have been removed from the role** " + rolen + "**").setEphemeral(true).queue();
+        if (event.getGuild().getSelfMember().canInteract(guildRole)) {
+            if (event.getMember().getRoles().contains(guildRole)) {
+                event.getGuild().removeRoleFromMember(event.getMember(), guildRole).queue();
+                return "You have been removed from the role** " + role + "**";
             } else {
-                event.reply("You don't have the role** " + rolen + "**").setEphemeral(true).queue();
+                return "You don't have the role** " + role + "**";
             }
         } else {
-            event.reply("I can't remove you from the role** " + rolen + "**").setEphemeral(true).queue();
+            return "I can't remove you from the role** " + role + "**";
         }
     }
 }

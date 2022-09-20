@@ -1,4 +1,4 @@
-package UCNDiscordBot.APIS;
+package UCNDiscordBot.APIS.APICalls;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -8,8 +8,9 @@ import java.net.http.HttpResponse;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-public class Facts {
+import UCNDiscordBot.APIS.GetAPIKey;
 
+public class Facts {
     public static String getFact() {
         try {
             HttpRequest request = HttpRequest.newBuilder()

@@ -6,23 +6,19 @@ import org.jetbrains.annotations.NotNull;
 
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 // Class to give rank on react
 public class ReactionListener extends ListenerAdapter {
+    // This runs if anyone reacts to a message
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-        // This runs if anyone reacts to a message
-
-        // The eventhandler
+        // checks if the owner of the message is a bot
         if (event.getUser().isBot())
-            // checks if the owner of the message is a bot
             return;
+        // This is true if the reaction happened in the channel called role
         if (isChannel(event, "roles")) {
-            // This is true if the reaction happened in the channel called role
-
             // Assign role to user
             assignRole(event);
         }
@@ -58,7 +54,6 @@ public class ReactionListener extends ListenerAdapter {
                         System.out.println("setting role");
                         setRole(roleID, event);
                     }
-
                 }
             }
         }

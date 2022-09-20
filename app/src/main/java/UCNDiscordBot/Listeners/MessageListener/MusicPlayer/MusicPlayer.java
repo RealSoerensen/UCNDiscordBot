@@ -1,4 +1,4 @@
-package UCNDiscordBot.MusicPlayer;
+package UCNDiscordBot.Listeners.MessageListener.MusicPlayer;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -42,6 +43,11 @@ public class MusicPlayer extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
+        if (event.getAuthor().isBot())
+            return;
+        if (!event.getChannel().getName().equals("bot-commands")) {
+            return;
+        }
         String[] command = event.getMessage().getContentRaw().split(" ", 2);
 
         if ("!play".equals(command[0]) && command.length == 2) {
