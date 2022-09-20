@@ -84,7 +84,7 @@ public class CommandManager extends ListenerAdapter {
 
             case "waifu":
                 String waifu = Waifu.getWaifu(event.getMember().getId().equals("217751208008351745"));
-                event.reply(waifu).queue();
+                event.reply(waifu).setEphemeral(true).queue();
                 break;
 
             case "gif":
