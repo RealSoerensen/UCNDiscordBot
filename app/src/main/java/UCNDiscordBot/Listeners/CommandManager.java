@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import UCNDiscordBot.APIS.APICalls.Facts;
 import UCNDiscordBot.APIS.APICalls.GiphyAPI;
 import UCNDiscordBot.APIS.APICalls.ProgrammerMeme;
+import UCNDiscordBot.APIS.APICalls.Waifu;
 import UCNDiscordBot.Functions.DiceRoller;
 import UCNDiscordBot.Functions.Magic8Ball;
 import UCNDiscordBot.Listeners.RoleListener.AvailableRoles;
@@ -81,6 +82,11 @@ public class CommandManager extends ListenerAdapter {
                 event.reply(fact).queue();
                 break;
 
+            case "waifu":
+                String waifu = Waifu.getWaifu(event.getMember().getId().equals("217751208008351745"));
+                event.reply(waifu).queue();
+                break;
+
             case "gif":
                 String gif = getGif(event);
                 event.reply(gif).queue();
@@ -128,6 +134,7 @@ public class CommandManager extends ListenerAdapter {
                         + "\n '__**/gif**__' <search> - Search for a gif. If blank a random gif will be found. "
                         + "\n '__**/ping**__' - Response with Pong! "
                         + "\n '__**/fact**__' - Prints a random Chuck Norris fact "
+                        + "\n '__**/waifu**__' - Prints you a waifu "
                         + "\n '__**/meme**__' - Prints a random programmer meme "
                         + "\n '__**/8ball**__' - Ask the magic 8-ball a question. "
                         + "\n "
@@ -139,7 +146,6 @@ public class CommandManager extends ListenerAdapter {
                         + "\n '__**!resume**__' - Resumes the current song. "
                         + "\n '__**!queue**__' - Shows the current queue. "
                         + "\n '__**!clear**__' - Clears the current queue. ").setEphemeral(true).queue();
-
         }
     }
     // Guild command -- Instantly updated (max 100)
@@ -170,6 +176,7 @@ public class CommandManager extends ListenerAdapter {
         commandData.add(Commands.slash("coinflip", "description"));
         commandData.add(Commands.slash("ping", "Return a pong."));
         commandData.add(Commands.slash("fact", "Get a random Chuck Norris fact."));
+        commandData.add(Commands.slash("waifu", "Get a random waifu (SFW)"));
         commandData.add(Commands.slash("meme", "Get a random programmer meme."));
         commandData.add(Commands.slash("gif", "Search for a gif. If blank a random gif will be found.")
                 .addOption(OptionType.STRING, "search", "Search for a gif.", false));

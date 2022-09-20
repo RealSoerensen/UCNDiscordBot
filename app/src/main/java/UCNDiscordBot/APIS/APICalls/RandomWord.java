@@ -1,4 +1,4 @@
-package UCNDiscordBot.APIS;
+package UCNDiscordBot.APIS.APICalls;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -6,7 +6,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class RandomWord {
-
     public static String getRandomWord() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -22,5 +21,4 @@ public class RandomWord {
         }
         return null;
     }
-
 }
