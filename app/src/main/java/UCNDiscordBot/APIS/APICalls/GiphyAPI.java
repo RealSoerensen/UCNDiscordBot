@@ -12,13 +12,12 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.*;
 
 import UCNDiscordBot.APIS.GetAPIKey;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public class GiphyAPI {
     private static String giphyKey = new GetAPIKey().getGiphyKey();
 
     // Find gif from giphy using search term
-    public static String getGif(String searchTerm) throws ParseException, IOException, InterruptedException {
+    public static String getGif(String searchTerm) {
         // Make restful call to giphy api
         searchTerm = searchTerm.replaceAll(" ", "+");
         String url = "http://api.giphy.com/v1/gifs/search?api_key=" + giphyKey + "&q=" + searchTerm
@@ -28,12 +27,24 @@ public class GiphyAPI {
                 .uri(URI.create(url))
                 .build();
 
-        HttpResponse<String> response = client.send(request,
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response;
+        try {
+            response = client.send(request,
+                    HttpResponse.BodyHandlers.ofString());
+        } catch (IOException e) {
+            return "Error: " + e.getMessage();
+        } catch (InterruptedException e) {
+            return "Error: " + e.getMessage();
+        }
 
         // Parse response
         JSONParser parser = new JSONParser();
-        JSONObject json = (JSONObject) parser.parse(response.body());
+        JSONObject json;
+        try {
+            json = (JSONObject) parser.parse(response.body());
+        } catch (ParseException e) {
+            return "Error: " + e.getMessage();
+        }
         JSONArray data = (JSONArray) json.get("data");
         Random random = new Random();
         JSONObject gif = (JSONObject) data.get(random.nextInt(data.size()));
@@ -44,7 +55,7 @@ public class GiphyAPI {
     }
 
     // Find random gif from giphy
-    public static Object getRandomGif() throws InterruptedException, IOException, ParseException {
+    public static String getRandomGif() {
         // Make restful call to giphy api
         String url = "http://api.giphy.com/v1/gifs/random?api_key=" + giphyKey;
         HttpClient client = HttpClient.newHttpClient();
@@ -52,42 +63,27 @@ public class GiphyAPI {
                 .uri(URI.create(url))
                 .build();
 
-        HttpResponse<String> response = client.send(request,
-                HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response;
+        try {
+            response = client.send(request,
+                    HttpResponse.BodyHandlers.ofString());
+        } catch (IOException e) {
+            return "Error: " + e.getMessage();
+        } catch (InterruptedException e) {
+            return "Error: " + e.getMessage();
+        }
 
         // Parse response
         JSONParser parser = new JSONParser();
-        JSONObject json = (JSONObject) parser.parse(response.body());
+        JSONObject json;
+        try {
+            json = (JSONObject) parser.parse(response.body());
+        } catch (ParseException e) {
+            return "Error: " + e.getMessage();
+        }
         JSONObject data = (JSONObject) json.get("data");
         JSONObject images = (JSONObject) data.get("images");
         JSONObject original = (JSONObject) images.get("original");
-        String gif = (String) original.get("url");
-        return gif;
-    }
-
-    public String gifOutput(SlashCommandInteractionEvent event) {
-        // Init variables
-        String gif = "";
-
-        // If the message contains no arguments
-        if (event.getOption("search") == null) {
-            // Get a random gif
-            try {
-                gif = (String) GiphyAPI.getRandomGif();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        // If the message contains arguments
-        else {
-            String args = event.getOption("search").getAsString();
-            // Try and get gif from GiphyAPI
-            try {
-                gif = (String) GiphyAPI.getGif(args);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return gif;
+        return (String) original.get("url");
     }
 }

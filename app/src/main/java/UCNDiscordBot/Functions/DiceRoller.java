@@ -1,6 +1,7 @@
 package UCNDiscordBot.Functions;
 
 import java.util.Random;
+import java.util.stream.IntStream;
 
 public class DiceRoller {
 
@@ -27,20 +28,21 @@ public class DiceRoller {
             }
 
             for (int i = 0; i < values.length; i++) {
-                if (i == 0) {
-                    outputString += values[i];
-                } else {
-                    outputString += " + " + values[i];
+                // add dice value to output string
+                // add + if not first value
+                if (i != 0) {
+                    outputString += " + ";
                 }
+                outputString += values[i];
             }
 
-            // Get sum of int array
-            int sum = 0;
-            for (int i = 0; i < values.length; i++) {
-                sum += values[i];
-            }
+            int sum = IntStream.of(values).sum();
+            double avg = (double) sum / (double) diceAmount;
+            outputString += " = " + sum + "\nAverage: " + avg;
 
-            outputString += " = " + sum;
+            if (outputString.length() > 2000) {
+                outputString = "Sum of all dice rolls: " + sum + "\nAverage: " + avg;
+            }
             return outputString;
 
         } catch (Exception e) {

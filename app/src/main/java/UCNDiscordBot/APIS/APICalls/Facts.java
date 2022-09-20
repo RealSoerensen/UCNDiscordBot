@@ -11,7 +11,6 @@ import org.json.simple.parser.JSONParser;
 import UCNDiscordBot.APIS.GetAPIKey;
 
 public class Facts {
-
     public static String getFact() {
         try {
             HttpRequest request = HttpRequest.newBuilder()
