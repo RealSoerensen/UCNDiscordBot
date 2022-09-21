@@ -1,16 +1,13 @@
 package UCNDiscordBot.APIS.APICalls;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Arrays;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import UCNDiscordBot.APIS.GetAPIKey;
 
@@ -54,52 +51,62 @@ public class JavaCompiler {
         }
     }
 
-    public static String compile(String code) {
+    public static String getCompileResult(String code) {
         return post(code);
     }
 
     public static String formater(String code) {
         StringBuilder reformatCode = new StringBuilder();
         try {
+            // split code into lines after each ";"
             String[] lines = code.split("(?<=\\{)|((?<=\\})|(?=\\}))");
             int indention = 0;
+
             for (String line : lines) {
+                // if line is empty, skip
                 if (line.equals(" ")) {
                     continue;
                 }
 
+                // Split code into new line after each ";"
                 if (line.contains(";")) {
                     String[] split = line.split("(?<=;)");
                     for (String s : split) {
+                        // if line is empty, skip
                         if (s.equals(" ")) {
                             continue;
-                        } else {
+                        }
+
+                        else {
                             s = s.trim();
                             reformatCode.append("\t".repeat(indention) + s + "\n");
                         }
-
                     }
                 }
 
+                // if the line ends with "{" append to string and then increase indention
                 else if (line.endsWith("{")) {
                     reformatCode.append(("\t").repeat(indention) + line + "\n");
                     indention++;
-
                 }
 
+                // if the line ends with "}" decrease indention and then append to string
                 else if (line.endsWith("}")) {
                     indention--;
                     reformatCode.append(("\t").repeat(indention) + line + "\n");
-
                 }
 
+                // else just append the line to the string
                 else {
                     reformatCode.append(("\t").repeat(indention) + line + "\n");
                 }
             }
-        } catch (Exception e) {
+        }
+
+        catch (Exception e) {
             return "Error: " + e.getMessage();
         }
+
         return reformatCode.toString();
     }
 }

@@ -1,7 +1,9 @@
 package UCNDiscordBot.Listeners;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -25,6 +27,7 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.utils.FileUpload;
 
 public class CommandManager extends ListenerAdapter {
     @Override
@@ -133,18 +136,44 @@ public class CommandManager extends ListenerAdapter {
                 break;
 
             case "javacompiler":
+                // get code from user
                 String code = event.getOption("code").getAsString();
                 event.deferReply().queue();
-                String codeOutput = JavaCompiler.compile(code);
+                // compile code and format code
+                String codeOutput = JavaCompiler.getCompileResult(code);
                 String reformatCode = JavaCompiler.formater(code);
+                // if the codeoutput is null, return error
                 if (codeOutput == null) {
                     event.getHook().editOriginal("There was an error compiling your code.").queue();
                     break;
                 }
 
-                event.getHook().editOriginal("Input:\n```java\n" + reformatCode.toString()
-                        + "```\nOutput: " + codeOutput).queue();
+                // construct the message to send
+                String newString = "Input:\n```java\n" + reformatCode.toString()
+                        + "```\nOutput: \n" + codeOutput;
 
+                // check if the output is too long
+                if (newString.length() > 2000) {
+                    // if it is, send the output in a file
+                    String fileName = "output.txt";
+                    File newFile = new File(fileName);
+                    try {
+                        FileWriter fileWriter = new FileWriter(newFile);
+                        fileWriter.write(newString);
+                        fileWriter.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        break;
+                    }
+                    FileUpload file = FileUpload.fromData(new File(fileName), fileName);
+                    newFile.delete();
+                    event.getHook().sendFiles(file).queue();
+
+                } else {
+                    // if not, send the output in a message
+                    event.getHook().editOriginal(newString).queue();
+
+                }
                 break;
 
             case "help":
