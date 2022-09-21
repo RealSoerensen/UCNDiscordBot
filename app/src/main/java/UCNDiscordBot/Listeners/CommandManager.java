@@ -16,6 +16,7 @@ import UCNDiscordBot.Functions.Magic8Ball;
 import UCNDiscordBot.Listeners.RoleListener.AvailableRoles;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
@@ -40,18 +41,14 @@ public class CommandManager extends ListenerAdapter {
 
             case "roll":
                 String option = "";
+                event.deferReply().queue();
                 if (event.getOption("xdx") == null) {
                     option = null;
                 } else {
                     option = event.getOption("xdx").getAsString();
                 }
-                String output;
-                try {
-                    output = DiceRoller.rollXDXSend(option);
-                } catch (ErrorResponseException e) {
-                    output = "Roll too large";
-                }
-                event.reply(output).queue();
+                String output = DiceRoller.rollXDXSend(option);
+                event.getHook().editOriginal(output).queue();
                 break;
 
             case "coinflip":
@@ -121,6 +118,19 @@ public class CommandManager extends ListenerAdapter {
                 event.reply(outputString).setEphemeral(true).queue();
                 break;
 
+            case "poll":
+                String poll = event.getOption("poll").getAsString();
+                // create poll
+                event.reply(user + " created a poll:\n" + poll).queue();
+                // get message id of reply
+                String messageId = event.getHook().retrieveOriginal().complete().getId();
+                // add reactions to the poll
+                event.getMessageChannel().retrieveMessageById(messageId).queue(message -> {
+                    message.addReaction(Emoji.fromUnicode("👍")).queue();
+                    message.addReaction(Emoji.fromUnicode("👎")).queue();
+                });
+                break;
+
             case "help":
                 event.reply("__**Here are the commands**__ " + user + ":"
                         + "\n '__**/welcome**__' - welcomes you to the server. "
@@ -178,6 +188,8 @@ public class CommandManager extends ListenerAdapter {
         commandData.add(Commands.slash("fact", "Get a random Chuck Norris fact."));
         commandData.add(Commands.slash("waifu", "Get a random waifu (SFW)"));
         commandData.add(Commands.slash("meme", "Get a random programmer meme."));
+        commandData.add(Commands.slash("poll", "Create a poll.").addOption(OptionType.STRING, "poll",
+                "The poll question.", true));
         commandData.add(Commands.slash("gif", "Search for a gif. If blank a random gif will be found.")
                 .addOption(OptionType.STRING, "search", "Search for a gif.", false));
         commandData.add(Commands.slash("removerole", "Remove a role from yourself.")
