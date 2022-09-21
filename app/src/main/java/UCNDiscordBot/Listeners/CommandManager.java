@@ -1,6 +1,7 @@
 package UCNDiscordBot.Listeners;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -135,7 +136,15 @@ public class CommandManager extends ListenerAdapter {
                 String code = event.getOption("code").getAsString();
                 event.deferReply().queue();
                 String codeOutput = JavaCompiler.compile(code);
-                event.getHook().editOriginal(codeOutput).queue();
+                String reformatCode = JavaCompiler.formater(code);
+                if (codeOutput == null) {
+                    event.getHook().editOriginal("There was an error compiling your code.").queue();
+                    break;
+                }
+
+                event.getHook().editOriginal("Input:\n```java\n" + reformatCode.toString()
+                        + "```\nOutput: " + codeOutput).queue();
+
                 break;
 
             case "help":
