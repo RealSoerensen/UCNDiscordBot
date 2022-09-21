@@ -11,6 +11,7 @@ import UCNDiscordBot.APIS.APICalls.Facts;
 import UCNDiscordBot.APIS.APICalls.GiphyAPI;
 import UCNDiscordBot.APIS.APICalls.ProgrammerMeme;
 import UCNDiscordBot.APIS.APICalls.Waifu;
+import UCNDiscordBot.APIS.APICalls.JavaCompiler;
 import UCNDiscordBot.Functions.DiceRoller;
 import UCNDiscordBot.Functions.Magic8Ball;
 import UCNDiscordBot.Listeners.RoleListener.AvailableRoles;
@@ -19,7 +20,6 @@ import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -131,6 +131,13 @@ public class CommandManager extends ListenerAdapter {
                 });
                 break;
 
+            case "javacompiler":
+                String code = event.getOption("code").getAsString();
+                event.deferReply().queue();
+                String codeOutput = JavaCompiler.compile(code);
+                event.getHook().editOriginal(codeOutput).queue();
+                break;
+
             case "help":
                 event.reply("__**Here are the commands**__ " + user + ":"
                         + "\n '__**/welcome**__' - welcomes you to the server. "
@@ -147,6 +154,8 @@ public class CommandManager extends ListenerAdapter {
                         + "\n '__**/waifu**__' - Prints you a waifu "
                         + "\n '__**/meme**__' - Prints a random programmer meme "
                         + "\n '__**/8ball**__' - Ask the magic 8-ball a question. "
+                        + "\n '__**/poll**__' - <poll> - Creates a poll. "
+                        + "\n '__**/javacompiler**__' - <code> - Compiles java code. "
                         + "\n "
                         + "\n __**Music Player commands:**__ "
                         + "\n '__**!play**__' - <url> - Plays a song from a url. "
@@ -190,6 +199,9 @@ public class CommandManager extends ListenerAdapter {
         commandData.add(Commands.slash("meme", "Get a random programmer meme."));
         commandData.add(Commands.slash("poll", "Create a poll.").addOption(OptionType.STRING, "poll",
                 "The poll question.", true));
+        commandData.add(
+                Commands.slash("javacompiler", "Compile java code and get output").addOption(OptionType.STRING, "code",
+                        "The java code.", true));
         commandData.add(Commands.slash("gif", "Search for a gif. If blank a random gif will be found.")
                 .addOption(OptionType.STRING, "search", "Search for a gif.", false));
         commandData.add(Commands.slash("removerole", "Remove a role from yourself.")
