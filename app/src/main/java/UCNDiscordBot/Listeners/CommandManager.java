@@ -13,6 +13,7 @@ import UCNDiscordBot.APIS.APICalls.ProgrammerMeme;
 import UCNDiscordBot.APIS.APICalls.Waifu;
 import UCNDiscordBot.Functions.DiceRoller;
 import UCNDiscordBot.Functions.Magic8Ball;
+import UCNDiscordBot.GameTest.GameController;
 import UCNDiscordBot.Listeners.RoleListener.AvailableRoles;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
@@ -89,6 +90,10 @@ public class CommandManager extends ListenerAdapter {
                 event.reply(gif).queue();
                 break;
 
+            case "question":
+                GameController.generateQuestion(event);
+                break;
+
             case "roles":
                 String allRoles = AvailableRoles.getRoles(event);
                 event.reply("Here are the roles you can add to yourself: \n" + allRoles).setEphemeral(true).queue();
@@ -145,6 +150,7 @@ public class CommandManager extends ListenerAdapter {
                         + "\n '__**/ping**__' - Response with Pong! "
                         + "\n '__**/fact**__' - Prints a random Chuck Norris fact "
                         + "\n '__**/waifu**__' - Prints you a waifu "
+                        + "\n '__**/question**__' - Get a random question "
                         + "\n '__**/meme**__' - Prints a random programmer meme "
                         + "\n '__**/8ball**__' - Ask the magic 8-ball a question. "
                         + "\n "
@@ -187,6 +193,7 @@ public class CommandManager extends ListenerAdapter {
         commandData.add(Commands.slash("ping", "Return a pong."));
         commandData.add(Commands.slash("fact", "Get a random Chuck Norris fact."));
         commandData.add(Commands.slash("waifu", "Get a random waifu (SFW)"));
+        commandData.add(Commands.slash("question", "Get a question"));
         commandData.add(Commands.slash("meme", "Get a random programmer meme."));
         commandData.add(Commands.slash("poll", "Create a poll.").addOption(OptionType.STRING, "poll",
                 "The poll question.", true));
