@@ -3,12 +3,12 @@ package UCNDiscordBot;
 import javax.security.auth.login.LoginException;
 
 import UCNDiscordBot.APIS.GetAPIKey;
-import UCNDiscordBot.APIS.APICalls.JavaCompiler;
+import UCNDiscordBot.APIS.APICalls.RandomQuestion;
+import UCNDiscordBot.GameTest.GameController;
 import UCNDiscordBot.Listeners.CommandManager;
 import UCNDiscordBot.Listeners.MessageListener.MessageListener;
 import UCNDiscordBot.Listeners.MessageListener.MusicPlayer.MusicPlayer;
 import UCNDiscordBot.Listeners.ReactionListener.ReactionListener;
-
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -30,6 +30,7 @@ public class App extends ListenerAdapter {
         builder.addEventListeners(new MusicPlayer());
         builder.addEventListeners(new ReactionListener());
         builder.addEventListeners(new CommandManager());
+        builder.addEventListeners(new GameController());
 
         // Set enabled intents
         builder.setEnabledIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS,

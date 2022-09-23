@@ -17,9 +17,11 @@ import UCNDiscordBot.APIS.APICalls.Waifu;
 import UCNDiscordBot.APIS.APICalls.JavaCompiler;
 import UCNDiscordBot.Functions.DiceRoller;
 import UCNDiscordBot.Functions.Magic8Ball;
+import UCNDiscordBot.GameTest.GameController;
 import UCNDiscordBot.Listeners.RoleListener.AvailableRoles;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -91,6 +93,11 @@ public class CommandManager extends ListenerAdapter {
             case "gif":
                 String gif = getGif(event);
                 event.reply(gif).queue();
+                break;
+
+            case "question":
+                MessageEmbed questionMessage = GameController.generateQuestion();
+                event.replyEmbeds(questionMessage).queue();
                 break;
 
             case "roles":
@@ -190,6 +197,7 @@ public class CommandManager extends ListenerAdapter {
                         + "\n '__**/ping**__' - Response with Pong! "
                         + "\n '__**/fact**__' - Prints a random Chuck Norris fact "
                         + "\n '__**/waifu**__' - Prints you a waifu "
+                        + "\n '__**/question**__' - Get a random question "
                         + "\n '__**/meme**__' - Prints a random programmer meme "
                         + "\n '__**/8ball**__' - Ask the magic 8-ball a question. "
                         + "\n '__**/poll**__' - <poll> - Creates a poll. "
@@ -234,6 +242,7 @@ public class CommandManager extends ListenerAdapter {
         commandData.add(Commands.slash("ping", "Return a pong."));
         commandData.add(Commands.slash("fact", "Get a random Chuck Norris fact."));
         commandData.add(Commands.slash("waifu", "Get a random waifu (SFW)"));
+        commandData.add(Commands.slash("question", "Get a question"));
         commandData.add(Commands.slash("meme", "Get a random programmer meme."));
         commandData.add(Commands.slash("poll", "Create a poll.").addOption(OptionType.STRING, "poll",
                 "The poll question.", true));
