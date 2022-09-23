@@ -17,6 +17,7 @@ import UCNDiscordBot.GameTest.GameController;
 import UCNDiscordBot.Listeners.RoleListener.AvailableRoles;
 import UCNDiscordBot.Listeners.RoleListener.ChangeRole;
 import UCNDiscordBot.Listeners.RoleListener.PlayerCount;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -91,7 +92,8 @@ public class CommandManager extends ListenerAdapter {
                 break;
 
             case "question":
-                GameController.generateQuestion(event);
+                MessageEmbed questionMessage = GameController.generateQuestion();
+                event.replyEmbeds(questionMessage).queue();
                 break;
 
             case "roles":
