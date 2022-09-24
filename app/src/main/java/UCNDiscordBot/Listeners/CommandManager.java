@@ -96,7 +96,7 @@ public class CommandManager extends ListenerAdapter {
                 break;
 
             case "question":
-                MessageEmbed questionMessage = GameController.initiateQuestionGame();
+                MessageEmbed questionMessage = GameController.startGameLobby();
                 event.replyEmbeds(questionMessage).queue();
                 break;
 

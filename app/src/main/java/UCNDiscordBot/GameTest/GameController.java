@@ -37,15 +37,16 @@ public class GameController extends ListenerAdapter {
     static String correctAnswer;
     static Emoji emojiCorrect;
     static String messageIDLatestQuestion;
-    static boolean canSend;
     static boolean isGameActive;
-    static ArrayList<Emoji> emojis = new ArrayList<>();
-    static ArrayList<User> players = new ArrayList<>();
-    static ArrayList<Integer> scores = new ArrayList<>();
-    static String latestQuestionID;
-    static String currentGameMessageID;
+    static boolean isLobbyOpen;
+    static ArrayList<Emoji> emojis;
+    static ArrayList<User> players;
+    static ArrayList<Integer> scores;
+    static String currentQuestionID;
+    static String currentLobbyID;
 
     public GameController() {
+        emojis = new ArrayList<>();
         emojis.add(Emoji.fromUnicode("U+2705"));
         emojis.add(Emoji.fromUnicode("U+31U+fe0fU+20e3"));
         emojis.add(Emoji.fromUnicode("U+32U+fe0fU+20e3"));
@@ -53,6 +54,15 @@ public class GameController extends ListenerAdapter {
         emojis.add(Emoji.fromUnicode("U+34U+fe0fU+20e3"));
         emojis.add(Emoji.fromUnicode("U+25B6"));
 
+        correctAnswer = "";
+
+        messageIDLatestQuestion = "";
+
+        isGameActive = false;
+        isLobbyOpen = false;
+
+        players = new ArrayList<>();
+        scores = new ArrayList<>();
     }
 
     /*
@@ -61,7 +71,7 @@ public class GameController extends ListenerAdapter {
      * Step one: Start the game
      * - A slash-command starts the game
      * - Calls method: startGameLobby() - that returns a messageEmbed
-     * - Calls method: setGameActive(true) - game is now active
+     * - setGameActive(true) - game is now active
      * - Sends lobby to channel where the slashcommand is called
      * - Players react to the lobby to join the game
      * - When any user reacts to the lobbymessage they will be added to the
@@ -73,7 +83,7 @@ public class GameController extends ListenerAdapter {
      * Step two: Generate question
      * - The playbutten-reaction on the lobby
      * OR
-     * - winner-check
+     * - winner-check: step five
      * is what can ask for a question
      * 
      * -
@@ -92,24 +102,41 @@ public class GameController extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        // System.out.println(event.getMessage().getEmbeds().get(0).getFields().get(0).getName().toString());
-        if (event.getAuthor().isBot() && canSend
-                && event.getMessage().getEmbeds().get(0).getFields().get(0).getName().equals("Question")) {
-            /*
-             * HELP: what can we do to make this shorter
-             * it needs to verify that the message send is a requested question
-             * so, it is unpacking the message down to fields,
-             */
-            latestQuestionID = event.getMessageId();
+
+        boolean isBot = event.getAuthor().isBot();
+        Message message = event.getMessage();
+        boolean isLobbyMessage = false;
+        boolean isQuestionMessage = false;
+
+        // Needs to use a try/catch here, if a NOT embedded message is sent, it would
+        // trigger at out of bound exception on getEmbeds.get(index)
+        try {
+            isLobbyMessage = event.getMessage().getEmbeds().get(0).getTitle().equals("Question Game");
+            isQuestionMessage = event.getMessage().getEmbeds().get(0).getFields().get(0).getName().equals("Question");
+        } catch (Exception e) {
+
+        }
+
+        // Step one - bot sends lobby to channel - needs reactions added - stores the
+        // lobby ID for later reference - Opens lobby for people to join
+        if (isGameActive && isBot && isLobbyMessage) {
+            message.addReaction(emojis.get(0)).queue();
+            message.addReaction(emojis.get(5)).queue();
+            currentLobbyID = message.getId();
+            isLobbyOpen = true;
+        }
+
+        // If the message is a travia question asked for by the bot, the ID need to be
+        // logged
+        // And reactions will be added so players can react to answer questions
+        if (isBot && isQuestionMessage && isGameActive) {
+            currentQuestionID = message.getId();
+
             event.getMessage().addReaction(emojis.get(1)).queue();
             event.getMessage().addReaction(emojis.get(2)).queue();
             event.getMessage().addReaction(emojis.get(3)).queue();
             event.getMessage().addReaction(emojis.get(4)).queue();
             event.getMessage().addReaction(emojis.get(0)).queue();
-            event.getMessage().addReaction(emojis.get(5)).queue();
-            messageIDLatestQuestion = event.getMessageId();
-            canSend = false; // now that the question is sent, this will be set to false - this will be set
-                             // to true, if the generateQuestion method is this class
         }
 
     }
@@ -121,17 +148,117 @@ public class GameController extends ListenerAdapter {
         boolean isCheckmark = event.getEmoji().asUnicode().equals(emojis.get(0));
         boolean isPlaybutton = event.getEmoji().asUnicode().equals(emojis.get(5));
         boolean isBot = event.getUser().isBot();
-        boolean isLatestQuestion = event.getMessageId().equals(messageIDLatestQuestion);
-        boolean isQuestion = event.retrieveMessage().complete().getEmbeds().get(0).getTitle().equals("Question Game");
+        boolean isPlayer = players.contains(event.getUser());
+        boolean isCurrentQuestion = event.getMessageId().equals(currentQuestionID);
+        boolean isLobbyMessage = event.getMessageId().equals(currentLobbyID);
+        User user = event.getUser();
+        MessageEmbed message = null;
+        // Needs to use a try/catch here, if a NOT embedded message is sent, it would
+        // trigger at out of bound exception on getEmbeds.get(index)
+        try {
+            message = event.retrieveMessage().complete().getEmbeds().get(0);
+        } catch (Exception e) {
+
+        }
         /*
          * checks if the emoji used to react is the checkmark emoji
          * and if the messagesender if NOT the bot.
          * and if the messageid is the messageIDLatestQuestion
          */
 
+        // Users reacting with checkmark on lobbymessage while lobby is open will be
+        // added to the game
+        if (!isBot && isCheckmark && isLobbyMessage && isLobbyOpen) {
+            addUserToLobby(user); // Adds the user that reacted to players
+            updateLobby(event, message);
+        }
+
+        // Any user reacting with "playbutton" on lobby will close the lobby and start
+        // the game
+        if (!isBot && isPlaybutton && isLobbyMessage && isLobbyOpen) {
+            isLobbyOpen = false;
+            updateLobby(event, message);
+            event.getChannel().sendMessageEmbeds(generateQuestion()).queue();
+
+        }
+
+        // If a player reacts with checkmark to the current question, the question will
+        // be evaluated
+        // Lobby will be updated
+        // Question will be deleted
+        if (isPlayer && isCheckmark && isCurrentQuestion) {
+            evaluateAnswer(event);
+            updateLobby(event, event.getChannel().retrieveMessageById(currentLobbyID).complete().getEmbeds().get(0));
+            event.getChannel().deleteMessageById(currentQuestionID).queue();
+            checkForWinners(event);
+        }
+
     }
 
-    private void updateMessageEmbed(MessageReactionAddEvent event, MessageEmbed reactedMessage, boolean isActive) {
+    private void checkForWinners(MessageReactionAddEvent event) {
+        boolean isWinners = false;
+        ArrayList<User> winners = new ArrayList<>();
+
+        for (int a = 0; a < players.size(); a++) {
+            if (scores.get(a) == 5) {
+                isWinners = true;
+                winners.add(players.get(a));
+            }
+        }
+        if (isWinners) {
+            // print output message with winners and maybe a scorecard
+            event.getChannel().sendMessageEmbeds(generateScoreCard(winners)).queue();
+            // Delete lobby
+            event.getChannel().deleteMessageById(currentLobbyID).queue();
+            // Reset game variables. - call the contructor
+            new GameController();
+        } else {
+            // no winners yet, send another question
+            event.getChannel().sendMessageEmbeds(generateQuestion()).queue();
+        }
+    }
+
+    private void addUserToLobby(User inputUser) {
+        /*
+         * Checks if the player is joined already
+         * if NOT:
+         * adds the player and score, so they share index
+         */
+        if (!players.contains(inputUser)) {
+            players.add(inputUser);
+            scores.add(0);
+        }
+    }
+
+    private MessageEmbed generateScoreCard(ArrayList<User> winners) {
+        EmbedBuilder outputEmbed = new EmbedBuilder();
+        String valueString = "";
+        String winnerString = "";
+        // Building valueString to that each player will have one line, "Playername:
+        // Score"
+        for (User element : players) {
+            valueString += element.getName() + ": " + scores.get(players.indexOf(element)) + " point(s)\n";
+        }
+        for (User element : winners) {
+            winnerString += element.getName() + "\n";
+        }
+
+        /*
+         * Message builder
+         * Sets the title
+         * Constructs the field
+         * Sets the Footer
+         */
+
+        outputEmbed.setTitle("Scorecard");
+        outputEmbed.addField("Winner(s)", winnerString, false);
+        outputEmbed.setFooter("Participants: \n" + valueString);
+
+        // Calls the method that will update the start/highscore message
+        return outputEmbed.build();
+    }
+
+    private void updateLobby(MessageReactionAddEvent event, MessageEmbed reactedMessage) {
         EmbedBuilder outputEmbed = new EmbedBuilder();
         String valueString = "";
         // Building valueString to that each player will have one line, "Playername:
@@ -152,14 +279,14 @@ public class GameController extends ListenerAdapter {
                 reactedMessage.getFields().get(0).getName(),
                 valueString,
                 reactedMessage.getFields().get(0).isInline());
-        if (isActive) {
-            outputEmbed.setFooter(reactedMessage.getFooter().getText());
+        if (isLobbyOpen) {
+            outputEmbed.setFooter("Lobby is open, React to the lobby to join");
         } else {
-            outputEmbed.setFooter("This game is inactive");
+            outputEmbed.setFooter("Lobby is Closed, Game is progress");
         }
 
         // Calls the method that will update the start/highscore message
-        event.getChannel().editMessageEmbedsById(event.getMessageId(), outputEmbed.build()).queue();
+        event.getChannel().editMessageEmbedsById(currentLobbyID, outputEmbed.build()).queue();
     }
 
     private void purgeMessages(TextChannel channel, int numberofMessages) {
@@ -181,9 +308,6 @@ public class GameController extends ListenerAdapter {
          * This method will return a prebuild embedded message, it will construct it
          * from data gathered from RandomQuestion.getQuestion
          */
-        canSend = true; // this will set the instance varible to true. it is a test for when multible
-                        // request for a question is issued,
-                        // the reactions added wont go to the wrong post
 
         String[] questionDetails = RandomQuestion.getQuestion(); // This string-array will contain a formatted
                                                                  // datastructure getQuestion retreive from WEB
@@ -318,30 +442,38 @@ public class GameController extends ListenerAdapter {
                 userListWinners.remove(element);
             }
         }
-        // output messages
-        event.getChannel().sendMessage("Corrrect answer: " + correctAnswer).queue();
-        if (userListWinners.size() != 0) {
-            event.getChannel().sendMessage("Winner(s):").queue();
-            event.getChannel().sendMessage(userListWinners.toString()).queue();
-        } else {
-            event.getChannel().sendMessage("Nobody won").queue();
+        // All winners will get their score incremented by one
+        for (String element : userListWinners) {
+            int index = userListWinners.indexOf(element);
+            scores.set(index, scores.get(index) + 1);
         }
 
-        /*
-         * Loops through all the lists and prints the username of those who voted
-         */
-        for (int a = 0; a < layer.size(); a++) {
-            System.out.println(a + 1 + ". Option:");
-            for (int b = 0; b < layer.get(a).size(); b++) {
-                System.out.println(layer.get(a).get(b).getName());
-            }
-            System.out.println("");
-        }
+        // // output messages
+        // event.getChannel().sendMessage("Corrrect answer: " + correctAnswer).queue();
+        // if (userListWinners.size() != 0) {
+        // event.getChannel().sendMessage("Winner(s):").queue();
+        // event.getChannel().sendMessage(userListWinners.toString()).queue();
+        // } else {
+        // event.getChannel().sendMessage("Nobody won").queue();
+        // }
+
+        // /*
+        // * Loops through all the lists and prints the username of those who voted
+        // */
+        // for (int a = 0; a < layer.size(); a++) {
+        // System.out.println(a + 1 + ". Option:");
+        // for (int b = 0; b < layer.get(a).size(); b++) {
+        // System.out.println(layer.get(a).get(b).getName());
+        // }
+        // System.out.println("");
+        // }
 
         return null;
     }
 
-    public static MessageEmbed initiateQuestionGame() {
+    public static MessageEmbed startGameLobby() {
+
+        // This is being called from the slashcommands and returns the lobby message
 
         EmbedBuilder outputMessage = new EmbedBuilder();
 
