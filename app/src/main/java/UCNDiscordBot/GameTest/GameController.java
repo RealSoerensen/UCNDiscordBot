@@ -5,6 +5,13 @@ import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.awt.Color;
+import java.lang.Object;
+
+import javax.print.attribute.standard.ColorSupported;
+import javax.swing.colorchooser.ColorSelectionModel;
+import javax.swing.plaf.synth.ColorType;
+import javax.swing.text.AttributeSet.ColorAttribute;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -48,6 +55,41 @@ public class GameController extends ListenerAdapter {
 
     }
 
+    /*
+     * This is an overview of the gamecontroller, this game of travia is done in
+     * different steps
+     * Step one: Start the game
+     * - A slash-command starts the game
+     * - Calls method: startGameLobby() - that returns a messageEmbed
+     * - Calls method: setGameActive(true) - game is now active
+     * - Sends lobby to channel where the slashcommand is called
+     * - Players react to the lobby to join the game
+     * - When any user reacts to the lobbymessage they will be added to the
+     * playerlist
+     * - Message will be updated to show the new player, with the score of 0
+     * - playbutten reaction is pressed to start game
+     * - From this point on, new players cant join the lobby
+     * 
+     * Step two: Generate question
+     * - The playbutten-reaction on the lobby
+     * OR
+     * - winner-check
+     * is what can ask for a question
+     * 
+     * -
+     * 
+     * Step three: Collect users with right answer / add to highscore
+     * 
+     * Step four: Remove question
+     * 
+     * Step five: Check if some has 5 right answers
+     * - if not repeat step 2-5
+     * 
+     * Step six: announce winner(s)
+     * 
+     * Step seven: Set the game to inactive
+     */
+
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         // System.out.println(event.getMessage().getEmbeds().get(0).getFields().get(0).getName().toString());
@@ -75,71 +117,48 @@ public class GameController extends ListenerAdapter {
     // This runs if anyone reacts to a message
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
+
+        boolean isCheckmark = event.getEmoji().asUnicode().equals(emojis.get(0));
+        boolean isPlaybutton = event.getEmoji().asUnicode().equals(emojis.get(5));
+        boolean isBot = event.getUser().isBot();
+        boolean isLatestQuestion = event.getMessageId().equals(messageIDLatestQuestion);
+        boolean isQuestion = event.retrieveMessage().complete().getEmbeds().get(0).getTitle().equals("Question Game");
         /*
          * checks if the emoji used to react is the checkmark emoji
          * and if the messagesender if NOT the bot.
          * and if the messageid is the messageIDLatestQuestion
          */
-        if (event.getEmoji().asUnicode().equals(emojis.get(0)) && !event.getUser().isBot()
-                && event.getMessageId().equals(messageIDLatestQuestion)) {
-            System.out.println("Evaluate Answer");
-            evaluateAnswer(event);
-        }
-        /*
-         * Next question
-         */
-        if (event.getEmoji().asUnicode().equals(emojis.get(5)) && !event.getUser().isBot()
-                && event.getMessageId().equals(messageIDLatestQuestion)) {
-            System.out.println("Next Question");
-            // Delete
-            event.getChannel().deleteMessageById(latestQuestionID).queue();
-
-            // New question
-            event.getChannel().sendMessageEmbeds(generateQuestion()).queue();
-        }
-        if (isGameActive && event.retrieveMessage().complete().getEmbeds().get(0).getTitle().equals("Question Game")
-                && event.getEmoji().asUnicode().equals(emojis.get(0)) && !event.getUser().isBot()) {
-            // This happens if the Game is active and if the reaction was added to the
-            // embedded message with the title "Question Game"
-            // reacted with checkmark
-            // Event not triggered by the bot
-            User userThatReacted = event.getUser();
-            MessageEmbed reactedMessage = event.retrieveMessage().complete().getEmbeds().get(0);
-            currentGameMessageID = event.getMessageId();
-            System.out.println("reacted to Gamestart message");
-
-            // add player to the field: players
-            // check if player is already in the game
-            if (!players.contains(userThatReacted)) {
-                players.add(userThatReacted);
-                scores.add(0);
-            }
-
-            // update message to fit new player
-            updateMessageEmbed(event, reactedMessage);
-
-            // clear reactions on message
-            // event.getReaction().clearReactions().queue();
-        }
 
     }
 
-    private void updateMessageEmbed(MessageReactionAddEvent event, MessageEmbed reactedMessage) {
+    private void updateMessageEmbed(MessageReactionAddEvent event, MessageEmbed reactedMessage, boolean isActive) {
         EmbedBuilder outputEmbed = new EmbedBuilder();
         String valueString = "";
-
         // Building valueString to that each player will have one line, "Playername:
         // Score"
         for (User element : players) {
             valueString += element.getName() + ": " + scores.get(players.indexOf(element)) + "\n";
         }
 
+        /*
+         * Message builder
+         * Sets the title
+         * Constructs the field
+         * Sets the Footer
+         */
+
         outputEmbed.setTitle(reactedMessage.getTitle());
         outputEmbed.addField(
                 reactedMessage.getFields().get(0).getName(),
                 valueString,
                 reactedMessage.getFields().get(0).isInline());
-        outputEmbed.setFooter(reactedMessage.getFooter().getText());
+        if (isActive) {
+            outputEmbed.setFooter(reactedMessage.getFooter().getText());
+        } else {
+            outputEmbed.setFooter("This game is inactive");
+        }
+
+        // Calls the method that will update the start/highscore message
         event.getChannel().editMessageEmbedsById(event.getMessageId(), outputEmbed.build()).queue();
     }
 
