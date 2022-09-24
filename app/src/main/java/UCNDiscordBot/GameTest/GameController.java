@@ -1,5 +1,6 @@
 package UCNDiscordBot.GameTest;
 
+import java.lang.reflect.Field;
 import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +24,19 @@ import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.internal.requests.Route.Emojis;
+import net.dv8tion.jda.internal.utils.message.MessageCreateBuilderMixin;
 
 public class GameController extends ListenerAdapter {
     static String correctAnswer;
     static Emoji emojiCorrect;
     static String messageIDLatestQuestion;
     static boolean canSend;
+    static boolean isGameActive;
     static ArrayList<Emoji> emojis = new ArrayList<>();
+    static ArrayList<User> players = new ArrayList<>();
+    static ArrayList<Integer> scores = new ArrayList<>();
+    static String latestQuestionID;
+    static String currentGameMessageID;
 
     public GameController() {
         emojis.add(Emoji.fromUnicode("U+2705"));
@@ -51,6 +58,7 @@ public class GameController extends ListenerAdapter {
              * it needs to verify that the message send is a requested question
              * so, it is unpacking the message down to fields,
              */
+            latestQuestionID = event.getMessageId();
             event.getMessage().addReaction(emojis.get(1)).queue();
             event.getMessage().addReaction(emojis.get(2)).queue();
             event.getMessage().addReaction(emojis.get(3)).queue();
@@ -84,11 +92,55 @@ public class GameController extends ListenerAdapter {
                 && event.getMessageId().equals(messageIDLatestQuestion)) {
             System.out.println("Next Question");
             // Delete
+            event.getChannel().deleteMessageById(latestQuestionID).queue();
 
             // New question
             event.getChannel().sendMessageEmbeds(generateQuestion()).queue();
         }
+        if (isGameActive && event.retrieveMessage().complete().getEmbeds().get(0).getTitle().equals("Question Game")
+                && event.getEmoji().asUnicode().equals(emojis.get(0)) && !event.getUser().isBot()) {
+            // This happens if the Game is active and if the reaction was added to the
+            // embedded message with the title "Question Game"
+            // reacted with checkmark
+            // Event not triggered by the bot
+            User userThatReacted = event.getUser();
+            MessageEmbed reactedMessage = event.retrieveMessage().complete().getEmbeds().get(0);
+            currentGameMessageID = event.getMessageId();
+            System.out.println("reacted to Gamestart message");
 
+            // add player to the field: players
+            // check if player is already in the game
+            if (!players.contains(userThatReacted)) {
+                players.add(userThatReacted);
+                scores.add(0);
+            }
+
+            // update message to fit new player
+            updateMessageEmbed(event, reactedMessage);
+
+            // clear reactions on message
+            // event.getReaction().clearReactions().queue();
+        }
+
+    }
+
+    private void updateMessageEmbed(MessageReactionAddEvent event, MessageEmbed reactedMessage) {
+        EmbedBuilder outputEmbed = new EmbedBuilder();
+        String valueString = "";
+
+        // Building valueString to that each player will have one line, "Playername:
+        // Score"
+        for (User element : players) {
+            valueString += element.getName() + ": " + scores.get(players.indexOf(element)) + "\n";
+        }
+
+        outputEmbed.setTitle(reactedMessage.getTitle());
+        outputEmbed.addField(
+                reactedMessage.getFields().get(0).getName(),
+                valueString,
+                reactedMessage.getFields().get(0).isInline());
+        outputEmbed.setFooter(reactedMessage.getFooter().getText());
+        event.getChannel().editMessageEmbedsById(event.getMessageId(), outputEmbed.build()).queue();
     }
 
     private void purgeMessages(TextChannel channel, int numberofMessages) {
@@ -268,5 +320,19 @@ public class GameController extends ListenerAdapter {
         }
 
         return null;
+    }
+
+    public static MessageEmbed initiateQuestionGame() {
+
+        EmbedBuilder outputMessage = new EmbedBuilder();
+
+        outputMessage.setTitle("Question Game");
+        outputMessage.addField("Players", "No players", false);
+        outputMessage.setFooter("React to this message to join game");
+
+        isGameActive = true;
+
+        return outputMessage.build();
+
     }
 }
