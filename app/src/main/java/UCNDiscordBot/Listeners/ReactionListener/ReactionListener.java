@@ -48,10 +48,8 @@ public class ReactionListener extends ListenerAdapter {
                 // If the message content equals the role name then add the role to the user
                 if (message.equals(roleName)) {
                     if (memberRoles.contains(thisRole)) {
-                        System.out.println("removing role");
                         removeRole(roleID, event);
                     } else {
-                        System.out.println("setting role");
                         setRole(roleID, event);
                     }
                 }

@@ -1,6 +1,5 @@
 package UCNDiscordBot.GameTest;
 
-import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -9,7 +8,6 @@ import org.jetbrains.annotations.NotNull;
 
 import UCNDiscordBot.APIS.APICalls.RandomQuestion;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageHistory;
@@ -17,12 +15,9 @@ import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.internal.requests.Route.Emojis;
 
 public class GameController extends ListenerAdapter {
     static String correctAnswer;
@@ -89,19 +84,6 @@ public class GameController extends ListenerAdapter {
             event.getChannel().sendMessageEmbeds(generateQuestion()).queue();
         }
 
-    }
-
-    private void purgeMessages(TextChannel channel, int numberofMessages) {
-        MessageHistory history = new MessageHistory(channel);
-        List<Message> msgs;
-
-        msgs = history.retrievePast(2).complete();
-        channel.deleteMessages(msgs).queue();
-
-    }
-
-    private void deleteMessage(MessageReactionAddEvent event) {
-        event.getChannel().deleteMessageById(event.getMessageId()).queue();
     }
 
     public static MessageEmbed generateQuestion() {
