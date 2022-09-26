@@ -1,38 +1,21 @@
 package UCNDiscordBot.GameTest;
 
-import java.lang.reflect.Field;
-import java.nio.channels.Channel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.awt.Color;
-import java.lang.Object;
-
-import javax.print.attribute.standard.ColorSupported;
-import javax.swing.colorchooser.ColorSelectionModel;
-import javax.swing.plaf.synth.ColorType;
-import javax.swing.text.AttributeSet.ColorAttribute;
 
 import org.jetbrains.annotations.NotNull;
 
 import UCNDiscordBot.APIS.APICalls.RandomQuestion;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.api.entities.MessageHistory;
-import net.dv8tion.jda.api.entities.MessageReaction;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.internal.requests.Route.Emojis;
-import net.dv8tion.jda.internal.utils.message.MessageCreateBuilderMixin;
 
 public class GameController extends ListenerAdapter {
     static String correctAnswer;
@@ -41,9 +24,7 @@ public class GameController extends ListenerAdapter {
     static boolean isGameActive;
     static boolean isLobbyOpen;
     static ArrayList<Emoji> emojis;
-    // static ArrayList<User> players;
     static ArrayList<User> playersWhoAnswered;
-    // static ArrayList<Integer> scores;
     static ArrayList<Player> players;
     static String currentQuestionID;
     static String currentLobbyID;
@@ -107,7 +88,6 @@ public class GameController extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-
         boolean isBot = event.getAuthor().isBot();
         Message message = event.getMessage();
         boolean isLobbyMessage = false;
@@ -116,8 +96,8 @@ public class GameController extends ListenerAdapter {
         // Needs to use a try/catch here, if a NOT embedded message is sent, it would
         // trigger at out of bound exception on getEmbeds.get(index)
         try {
-            isLobbyMessage = event.getMessage().getEmbeds().get(0).getTitle().equals("Question Game");
-            isQuestionMessage = event.getMessage().getEmbeds().get(0).getFields().get(0).getName().equals("Question");
+            isLobbyMessage = message.getEmbeds().get(0).getTitle().equals("Question Game");
+            isQuestionMessage = message.getEmbeds().get(0).getFields().get(0).getName().equals("Question");
         } catch (Exception e) {
 
         }
@@ -138,19 +118,17 @@ public class GameController extends ListenerAdapter {
         if (isBot && isQuestionMessage && isGameActive) {
             currentQuestionID = message.getId();
 
-            event.getMessage().addReaction(emojis.get(1)).queue();
-            event.getMessage().addReaction(emojis.get(2)).queue();
-            event.getMessage().addReaction(emojis.get(3)).queue();
-            event.getMessage().addReaction(emojis.get(4)).queue();
-            event.getMessage().addReaction(emojis.get(0)).queue();
+            message.addReaction(emojis.get(1)).queue();
+            message.addReaction(emojis.get(2)).queue();
+            message.addReaction(emojis.get(3)).queue();
+            message.addReaction(emojis.get(4)).queue();
+            message.addReaction(emojis.get(0)).queue();
         }
-
     }
 
     // This runs if anyone reacts to a message
     @Override
     public void onMessageReactionAdd(@NotNull MessageReactionAddEvent event) {
-
         boolean isCheckmark = event.getEmoji().asUnicode().equals(emojis.get(0));
         boolean isPlaybutton = event.getEmoji().asUnicode().equals(emojis.get(5));
         boolean isSkip = event.getEmoji().asUnicode().equals(emojis.get(6));
@@ -173,6 +151,7 @@ public class GameController extends ListenerAdapter {
         } catch (Exception e) {
 
         }
+
         for (Player element : players) {
             if (element.getUser().equals(event.getUser())) {
                 isPlayer = true;
@@ -187,13 +166,12 @@ public class GameController extends ListenerAdapter {
             updateLobby(event, message);
         }
 
-        // Any player reacting with "playbutton" on lobby will close the lobby and start
-        // the game
+        // Any player reacting with "playbutton" on lobby will close the lobby and
+        // start the game
         if (!isBot && isPlayer && isPlaybutton && isLobbyMessage && isLobbyOpen) {
             isLobbyOpen = false;
             updateLobby(event, message);
             event.getChannel().sendMessageEmbeds(generateQuestion()).queue();
-
         }
 
         // If a player reacts with checkmark to the current question, the question will
@@ -244,28 +222,21 @@ public class GameController extends ListenerAdapter {
             event.getChannel().deleteMessageById(currentQuestionID).queue();
             event.getChannel().sendMessageEmbeds(generateQuestion()).queue();
         }
-
     }
 
+    /*
+     * This method will be used to check is there is any players who meet the
+     * conditions to win default is set to 5
+     */
     private void checkForWinners(MessageReactionAddEvent event) {
-        /*
-         * This method will be used to check is there is any players who meet the
-         * conditions to win default is set to 5
-         */
         int winCondition = 5;
         boolean isWinners = false;
         ArrayList<User> winners = new ArrayList<>();
 
-        // for (int a = 0; a < players.size(); a++) {
-        // if (scores.get(a) == winCondition) {
-        // isWinners = true;
-        // winners.add(players.get(a));
-        // }
-        // }
-        for (int a = 0; a < players.size(); a++) {
-            if (players.get(a).getScore() == winCondition) {
+        for (Player player : players) {
+            if (player.getScore() == winCondition) {
                 isWinners = true;
-                winners.add(players.get(a).getUser());
+                winners.add(player.getUser());
             }
         }
         // if there is atleast one winner, the game ends
@@ -302,16 +273,12 @@ public class GameController extends ListenerAdapter {
     }
 
     private static void addUserToLobby(User inputUser) {
-
         boolean isUserInLobby = false;
         /*
          * Checks if the player is joined already
          * if NOT:
          * adds the player and score, so they share index
          */
-        // if (!players.contains(inputUser)) {
-        // players.add(new Player(inputUser));
-        // }
         for (Player element : players) {
             if (element.getUser().getName().equals(inputUser.getName())) {
                 isUserInLobby = true;
@@ -382,19 +349,6 @@ public class GameController extends ListenerAdapter {
         event.getChannel().editMessageEmbedsById(currentLobbyID, outputEmbed.build()).queue();
     }
 
-    private void purgeMessages(TextChannel channel, int numberofMessages) {
-        MessageHistory history = new MessageHistory(channel);
-        List<Message> msgs;
-
-        msgs = history.retrievePast(2).complete();
-        channel.deleteMessages(msgs).queue();
-
-    }
-
-    private void deleteMessage(MessageReactionAddEvent event) {
-        event.getChannel().deleteMessageById(event.getMessageId()).queue();
-    }
-
     public static MessageEmbed generateQuestion() {
         /*
          * Method description:
@@ -415,11 +369,12 @@ public class GameController extends ListenerAdapter {
 
         EmbedBuilder embedBuilder = new EmbedBuilder(); // Embedbuilder will be used to prebuild the embedded message
                                                         // that will be return at the end of the method
-
         // Assign correct answer
         correctAnswer = questionDetails[2];
+
         // Clean the question string
         questionDetails[1] = cleanString(questionDetails[1]);
+
         /*
          * Here the method will construct the message
          */
@@ -432,7 +387,6 @@ public class GameController extends ListenerAdapter {
                         emojis.get(4).getFormatted() + ": " + cleanString(questionDetails[placement[3]]) + "\n");
 
         return embedBuilder.build();
-
     }
 
     public static int[] random4Ints() {
@@ -470,112 +424,44 @@ public class GameController extends ListenerAdapter {
             }
             inputNumbers.remove(randomIndex);
         }
+
         // save correct answer emoji
         /*
          * this will check what emoji will be assigned to the correct answer.
          * if the correct was found during the 3rd loop-round the index is 2 and will
          * get assigned to the 3rd emoji
          */
-        if (correctIndex == 0) {
-            emojiCorrect = emojis.get(1);
-        }
-        if (correctIndex == 1) {
-            emojiCorrect = emojis.get(2);
-        }
-        if (correctIndex == 2) {
-            emojiCorrect = emojis.get(3);
-        }
-        if (correctIndex == 3) {
-            emojiCorrect = emojis.get(4);
+        switch (correctIndex) {
+            case 0:
+                emojiCorrect = emojis.get(1);
+                break;
+            case 1:
+                emojiCorrect = emojis.get(2);
+                break;
+            case 2:
+                emojiCorrect = emojis.get(3);
+                break;
+            case 3:
+                emojiCorrect = emojis.get(4);
+                break;
         }
 
         return outputInt;
     }
 
-    private Message evaluateAnswer(MessageReactionAddEvent event, MessageEmbed questionEmbed) {
+    public void evaluateAnswer(MessageReactionAddEvent event, MessageEmbed questionEmbed) {
+        CheckAnswers.evaluateAnswer(event, emojis, emojiCorrect, players);
         EmbedBuilder outputEmbed = new EmbedBuilder();
-        List<MessageReaction> allReactions = event.retrieveMessage().complete().getReactions();
-        ArrayList<List<User>> layer = new ArrayList<>();
-        int correctIndex = emojis.indexOf(emojiCorrect) - 1;
-
-        ArrayList<String> userListWinners = new ArrayList<>();
-        ArrayList<String> userListLosers = new ArrayList<>();
-
         outputEmbed.setTitle(questionEmbed.getTitle());
         outputEmbed.addField(questionEmbed.getFields().get(0));
         outputEmbed.setFooter(emojiCorrect.getFormatted() + ": " + cleanString(correctAnswer));
 
         // Calls the method that will update the question message
         event.getChannel().editMessageEmbedsById(currentQuestionID, outputEmbed.build()).queue();
-        /*
-         * This loop will go through all the reactions on the message, and retrieve the
-         * userlist for each reaction from left to right
-         * index 0: First answer option
-         * index 1: Second answer option
-         * index 2: Third answer option
-         * index 3: Fourth answer option
-         * index 4: Checkmark
-         */
-        for (int a = 0; a < allReactions.size(); a++) {
-            layer.add(allReactions.get(a).retrieveUsers().complete());
-        }
-        System.out.println("Correct index: " + correctIndex);
-
-        // Loop for winners/losers
-        for (int a = 0; a < 4; a++) {
-            if (a == correctIndex) {
-                // Winners
-                for (int b = 0; b < layer.get(a).size(); b++) {
-                    userListWinners.add((layer.get(a).get(b).getName()));
-                }
-            } else {
-                // Losers
-                for (int b = 0; b < layer.get(a).size(); b++) {
-                    userListLosers.add((layer.get(a).get(b).getName()));
-                }
-            }
-        }
-
-        // remove winners who voted for more than the winning choise
-        for (String element : userListLosers) {
-            // if winner user is in loser list return true
-            if (userListWinners.contains(element)) {
-                userListWinners.remove(element);
-            }
-        }
-        // All winners will get their score incremented by one
-        for (Player element : players) {
-            if (userListWinners.contains(element.getUser().getName()))
-                element.scoreIncrease();
-        }
-
-        // // output messages
-        // event.getChannel().sendMessage("Corrrect answer: " + correctAnswer).queue();
-        // if (userListWinners.size() != 0) {
-        // event.getChannel().sendMessage("Winner(s):").queue();
-        // event.getChannel().sendMessage(userListWinners.toString()).queue();
-        // } else {
-        // event.getChannel().sendMessage("Nobody won").queue();
-        // }
-
-        // /*
-        // * Loops through all the lists and prints the username of those who voted
-        // */
-        // for (int a = 0; a < layer.size(); a++) {
-        // System.out.println(a + 1 + ". Option:");
-        // for (int b = 0; b < layer.get(a).size(); b++) {
-        // System.out.println(layer.get(a).get(b).getName());
-        // }
-        // System.out.println("");
-        // }
-
-        return null;
     }
 
+    // This is being called from the slashcommands and returns the lobby message
     public static MessageEmbed startGameLobby(User startingPlayer) {
-
-        // This is being called from the slashcommands and returns the lobby message
-
         players = new ArrayList<>();
         // scores = new ArrayList<>();
         players.add(new Player(startingPlayer));
@@ -590,6 +476,5 @@ public class GameController extends ListenerAdapter {
         isGameActive = true;
 
         return outputMessage.build();
-
     }
 }
