@@ -205,10 +205,8 @@ public class GameController extends ListenerAdapter {
             }
 
             if (allPlayerHasAnswered) {
-                evaluateAnswer(event,
-                        event.getChannel().retrieveMessageById(currentQuestionID).complete().getEmbeds().get(0));
-                updateLobby(event,
-                        event.getChannel().retrieveMessageById(currentLobbyID).complete().getEmbeds().get(0));
+                evaluateAnswer(event, getMessageId(event, currentQuestionID));
+                updateLobby(event, getMessageId(event, currentLobbyID));
                 event.getChannel().deleteMessageById(currentQuestionID).queueAfter(5, TimeUnit.SECONDS);
                 checkForWinners(event);
                 playersWhoAnswered.clear();
@@ -243,7 +241,7 @@ public class GameController extends ListenerAdapter {
         // if no winners yet, print another question
         if (isWinners) {
             // print output message with winners and maybe a scorecard
-            event.getChannel().sendMessageEmbeds(generateScoreCard(winners)).queue();
+            event.getChannel().sendMessageEmbeds(Scoreboard.generateScoreCard(winners, players)).queue();
             // Delete lobby
             event.getChannel().deleteMessageById(currentLobbyID).queue();
             // Reset game variables. - call the contructor
@@ -273,49 +271,17 @@ public class GameController extends ListenerAdapter {
     }
 
     private static void addUserToLobby(User inputUser) {
-        boolean isUserInLobby = false;
         /*
          * Checks if the player is joined already
          * if NOT:
          * adds the player and score, so they share index
          */
         for (Player element : players) {
-            if (element.getUser().getName().equals(inputUser.getName())) {
-                isUserInLobby = true;
+            if (!element.getUser().getName().equals(inputUser.getName())) {
+                players.add(new Player(inputUser));
                 break;
             }
         }
-        if (!isUserInLobby) {
-            players.add(new Player(inputUser));
-        }
-    }
-
-    private MessageEmbed generateScoreCard(ArrayList<User> winners) {
-        EmbedBuilder outputEmbed = new EmbedBuilder();
-        String valueString = "";
-        String winnerString = "";
-        // Building valueString to that each player will have one line, "Playername:
-        // Score"
-        for (Player element : players) {
-            valueString += element.getUser().getName() + ": " + element.getScore() + " point(s)\n";
-        }
-        for (User element : winners) {
-            winnerString += element.getName() + "\n";
-        }
-
-        /*
-         * Message builder
-         * Sets the title
-         * Constructs the field
-         * Sets the Footer
-         */
-
-        outputEmbed.setTitle("Scorecard");
-        outputEmbed.addField("Winner(s)", winnerString, false);
-        outputEmbed.setFooter("Participants: \n" + valueString);
-
-        // Calls the method that will update the start/highscore message
-        return outputEmbed.build();
     }
 
     private void updateLobby(MessageReactionAddEvent event, MessageEmbed reactedMessage) {
@@ -447,6 +413,10 @@ public class GameController extends ListenerAdapter {
         }
 
         return outputInt;
+    }
+
+    public MessageEmbed getMessageId(MessageReactionAddEvent event, String id) {
+        return event.getChannel().retrieveMessageById(id).complete().getEmbeds().get(0);
     }
 
     public void evaluateAnswer(MessageReactionAddEvent event, MessageEmbed questionEmbed) {
