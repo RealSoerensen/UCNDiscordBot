@@ -5,10 +5,12 @@ import net.dv8tion.jda.api.entities.User;
 public class Player {
     private User user;
     private int score;
+    private boolean isLeader;
 
-    public Player(User user) {
+    public Player(User user, boolean leader) {
         this.user = user;
         score = 0;
+        isLeader = leader;
     }
 
     public User getUser() {
@@ -17,6 +19,10 @@ public class Player {
 
     public int getScore() {
         return score;
+    }
+
+    public boolean isLeader() {
+        return isLeader;
     }
 
     public void setName(User user) {

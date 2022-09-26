@@ -138,6 +138,7 @@ public class GameController extends ListenerAdapter {
                 event.getEmoji().asUnicode().equals(emojis.get(4));
         boolean isBot = event.getUser().isBot();
         boolean isPlayer = false;
+        boolean isLeader = false;
         boolean isCurrentQuestion = event.getMessageId().equals(currentQuestionID);
         boolean isLobbyMessage = event.getMessageId().equals(currentLobbyID);
         boolean allPlayerHasAnswered;
@@ -155,6 +156,7 @@ public class GameController extends ListenerAdapter {
         for (Player element : players) {
             if (element.getUser().equals(event.getUser())) {
                 isPlayer = true;
+                isLeader = element.isLeader();
                 break;
             }
         }
@@ -166,20 +168,21 @@ public class GameController extends ListenerAdapter {
             updateLobby(event, message);
         }
 
-        // Any player reacting with "playbutton" on lobby will close the lobby and
+        // if the leader reacts with "playbutton" on lobby will close the lobby and
         // start the game
-        if (!isBot && isPlayer && isPlaybutton && isLobbyMessage && isLobbyOpen) {
+        if (!isBot && isLeader && isPlaybutton && isLobbyMessage && isLobbyOpen) {
             isLobbyOpen = false;
             updateLobby(event, message);
             event.getChannel().sendMessageEmbeds(generateQuestion()).queue();
         }
 
-        // If a player reacts with checkmark to the current question, the question will
+        // If the leader reacts with checkmark to the current question, the question
+        // will
         // be evaluated
         // Lobby will be updated
         // Question will be deleted
         // this is force evaluate
-        if (isPlayer && isCheckmark && isCurrentQuestion) {
+        if (isLeader && isCheckmark && isCurrentQuestion) {
             evaluateAnswer(event,
                     event.getChannel().retrieveMessageById(currentQuestionID).complete().getEmbeds().get(0));
             updateLobby(event, event.getChannel().retrieveMessageById(currentLobbyID).complete().getEmbeds().get(0));
@@ -215,10 +218,11 @@ public class GameController extends ListenerAdapter {
             }
         }
 
-        // If a player reacts to the lobby with the skip emoji, the current question is
+        // If the leader reacts to the lobby with the skip emoji, the current question
+        // is
         // removed and a new question will be displayed
         // this can be used if for some reason the new question fails the show
-        if (isPlayer && isSkip && isLobbyMessage && !isLobbyOpen) {
+        if (isLeader && isSkip && isLobbyMessage && !isLobbyOpen) {
             event.getChannel().deleteMessageById(currentQuestionID).queue();
             event.getChannel().sendMessageEmbeds(generateQuestion()).queue();
         }
@@ -286,7 +290,7 @@ public class GameController extends ListenerAdapter {
             }
         }
         if (!isUserInLobby) {
-            players.add(new Player(inputUser));
+            players.add(new Player(inputUser, false));
         }
     }
 
@@ -464,7 +468,7 @@ public class GameController extends ListenerAdapter {
     public static MessageEmbed startGameLobby(User startingPlayer) {
         players = new ArrayList<>();
         // scores = new ArrayList<>();
-        players.add(new Player(startingPlayer));
+        players.add(new Player(startingPlayer, true));
         addUserToLobby(players.get(0).getUser());
 
         EmbedBuilder outputMessage = new EmbedBuilder();
